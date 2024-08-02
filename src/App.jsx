@@ -1,15 +1,18 @@
 import React from 'react';
 
-
+import Main from './components/Main'
+import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import Main from './components/Main';
 
 const App = () => {
   return (
-    <div className="flex">
-      <Sidebar/>
-      <div className="w-full ml-64">
-        <Main />
+    <div>
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        <div className="w-full ml-64">
+          <Main/>
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import forecast from "./forecast.png"
 import location from "./location.png"
 import settings from "./settings.png"
 import calendar from "./calendar.png"
+import user from "./user.png"
 export const assets ={
     notificationbell,
     magnifyingglass,
@@ -14,5 +15,6 @@ export const assets ={
     location,
     forecast,
     settings,
-    calendar
+    calendar,
+    user
  } 
