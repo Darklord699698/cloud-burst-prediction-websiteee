@@ -26,4 +26,3 @@ const Header = () => {
 };
 
 export default Header;
-//header file goes hardd

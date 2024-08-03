@@ -3,8 +3,8 @@ import React from 'react';
 const Main = () => {
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold">Welcome to the Main Page</h1>
-      <p>This is the main content area.</p>
+      <p>Current location</p>
+      <h1 className="text-2xl font-bold">Los Angeles, CA, USA</h1>
     </div>
   );
 };
