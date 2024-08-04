@@ -1,29 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
+import Chart from 'chart.js/auto'; // Auto registration of components
 import axios from 'axios';
 import { assets } from '../assets/assets';
 import './ImageSlider.css';
-
-// Import Chart.js components
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
-
-// Register components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 const images = [
   { src: 'https://media.tacdn.com/media/attractions-content--1x-1/10/47/5a/bf.jpg', name: 'Los Angeles, CA, USA' },
@@ -80,12 +60,52 @@ const Main = () => {
         {
           label: 'Chance of Rain (%)',
           data,
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          backgroundColor: 'rgba(54, 162, 235, 0.5)',  // More visible color
           borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1,
+          borderWidth: 2,
         },
       ],
     };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: {
+          display: true,  // Show grid lines
+        },
+        ticks: {
+          autoSkip: false,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          display: true,  // Show grid lines
+        },
+        ticks: {
+          callback: function(value) {
+            return value + '%';  // Add '%' sign to y-axis labels
+          },
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(tooltipItem) {
+            return tooltipItem.label + ': ' + tooltipItem.raw + '%';  // Add '%' sign to tooltips
+          },
+        },
+      },
+    },
   };
 
   return (
@@ -119,13 +139,13 @@ const Main = () => {
         <div className="flex-1 mt-4 lg:mt-0 lg:ml-4">
           <div className="mb-4">
             <h2 className="text-xl font-bold">Chances of Raining</h2>
-            <div className="h-24 p-4 bg-blue-200 rounded-md">
+            <div className="h-48 p-4 bg-blue-200 rounded-md">  {/* Increased height */}
               {loading ? (
                 <p>Loading...</p>
               ) : error ? (
                 <p>{error}</p>
               ) : (
-                <Bar data={generateChartData()} options={{ responsive: true, maintainAspectRatio: false }} />
+                <Bar data={generateChartData()} options={chartOptions} />
               )}
             </div>
           </div>
