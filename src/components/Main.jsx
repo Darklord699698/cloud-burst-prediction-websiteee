@@ -1,5 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Bar } from 'react-chartjs-2';
+import axios from 'axios';
 import { assets } from '../assets/assets';
+import './ImageSlider.css';
+
+// Import Chart.js components
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+// Register components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const images = [
   { src: 'https://media.tacdn.com/media/attractions-content--1x-1/10/47/5a/bf.jpg', name: 'Los Angeles, CA, USA' },
@@ -10,6 +34,30 @@ const images = [
 
 const Main = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [weatherData, setWeatherData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const apiKey = '7b3ffbfe64a1f83e9f112cb4896344ad';  // Replace with your actual API key
+
+  const getWeather = async (city) => {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+    try {
+      const response = await axios.get(url);
+      setWeatherData(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching weather data', error);
+      setError('Failed to fetch weather data');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch weather data for the default city when the component mounts
+    getWeather('New York');
+  }, []);  // Empty dependency array ensures this runs only once on mount
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -17,6 +65,27 @@ const Main = () => {
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
+
+  const generateChartData = () => {
+    if (!weatherData || !weatherData.weather) return {};
+
+    // Create dummy data for chart (example purposes)
+    const labels = ['12:00', '15:00', '18:00', '21:00'];
+    const data = [10, 20, 30, 40];  // Replace with actual data if needed
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Chance of Rain (%)',
+          data,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
   };
 
   return (
@@ -29,7 +98,7 @@ const Main = () => {
             <img 
               src={images[currentIndex].src} 
               alt={images[currentIndex].name} 
-              className="object-cover w-full rounded-md h-80"
+              className="object-cover w-full rounded-md h-80 fade"
             />
             <div className="absolute inset-0 flex items-center justify-between px-4 py-2">
               <button 
@@ -51,7 +120,13 @@ const Main = () => {
           <div className="mb-4">
             <h2 className="text-xl font-bold">Chances of Raining</h2>
             <div className="h-24 p-4 bg-blue-200 rounded-md">
-              <p className="text-sm">Currently, there's a 15% chance of rain for today.</p>
+              {loading ? (
+                <p>Loading...</p>
+              ) : error ? (
+                <p>{error}</p>
+              ) : (
+                <Bar data={generateChartData()} options={{ responsive: true, maintainAspectRatio: false }} />
+              )}
             </div>
           </div>
           <div>
