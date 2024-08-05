@@ -9,9 +9,9 @@ import './ImageSlider.css';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const images = [
-  { src: 'https://media.tacdn.com/media/attractions-content--1x-1/10/47/5a/bf.jpg', name: 'Los Angeles', country: 'US' },
-  { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/New_york_times_square-terabass.jpg/1200px-New_york_times_square-terabass.jpg', name: 'New York', country: 'US' },
-  { src: 'https://i.natgeofe.com/n/6c531f9e-081f-45cb-ae6c-42bed4c67f45/chicago-travel_4x3.jpg', name: 'Chicago', country: 'US' },
+  { src: 'https://shorturl.at/55pvK', name: 'Los Angeles', country: 'US' },
+  { src: 'https://shorturl.at/D8PGy', name: 'New York', country: 'US' },
+  { src: 'https://shorturl.at/MX3Xr', name: 'Chicago', country: 'US' },
   // Add more images and names as needed
 ];
 
