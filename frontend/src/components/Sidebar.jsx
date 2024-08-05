@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const Sidebar = () => {
   return (
     <div className="fixed top-0 left-0 z-10 w-64 h-full bg-blue-950">
-      <ul className="flex flex-col h-full p-4 text-center">
+      <ul className="flex flex-col h-full p-4 mt-24 text-center">
         <li className="mb-4 ml-2">
           <Link to="/" className="text-white">Home</Link>
         </li>
