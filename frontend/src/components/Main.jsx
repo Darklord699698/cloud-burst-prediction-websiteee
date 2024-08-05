@@ -1,31 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
-import Chart from 'chart.js/auto'; // Auto registration of components
+import { CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, Chart as ChartJS } from 'chart.js';
 import axios from 'axios';
 import { assets } from '../assets/assets';
 import './ImageSlider.css';
 
+// Register the required components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
 const images = [
-  { src: 'https://media.tacdn.com/media/attractions-content--1x-1/10/47/5a/bf.jpg', name: 'Los Angeles, CA, USA' },
-  { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/New_york_times_square-terabass.jpg/1200px-New_york_times_square-terabass.jpg', name: 'New York, NY, USA' },
-  { src: 'https://i.natgeofe.com/n/6c531f9e-081f-45cb-ae6c-42bed4c67f45/chicago-travel_4x3.jpg', name: 'Chicago, IL, USA' },
+  { src: 'https://media.tacdn.com/media/attractions-content--1x-1/10/47/5a/bf.jpg', name: 'Los Angeles', country: 'US' },
+  { src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/New_york_times_square-terabass.jpg/1200px-New_york_times_square-terabass.jpg', name: 'New York', country: 'US' },
+  { src: 'https://i.natgeofe.com/n/6c531f9e-081f-45cb-ae6c-42bed4c67f45/chicago-travel_4x3.jpg', name: 'Chicago', country: 'US' },
   // Add more images and names as needed
 ];
 
 const Main = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [weatherData, setWeatherData] = useState(null);
+  const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const apiKey = '7b3ffbfe64a1f83e9f112cb4896344ad';  // Replace with your actual API key
 
-  const getWeather = async (city) => {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+  const getWeather = async (city, country) => {
+    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${apiKey}&units=metric`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city},${country}&appid=${apiKey}&units=metric`;
 
     try {
-      const response = await axios.get(url);
-      setWeatherData(response.data);
+      const [weatherResponse, forecastResponse] = await Promise.all([
+        axios.get(weatherUrl),
+        axios.get(forecastUrl)
+      ]);
+      setWeatherData(weatherResponse.data);
+      setForecastData(forecastResponse.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching weather data', error);
@@ -36,8 +45,9 @@ const Main = () => {
 
   useEffect(() => {
     // Fetch weather data for the default city when the component mounts
-    getWeather('New York');
-  }, []);  // Empty dependency array ensures this runs only once on mount
+    const { name, country } = images[currentIndex];
+    getWeather(name, country);
+  }, [currentIndex]);  // Fetch data when currentIndex changes
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -48,11 +58,10 @@ const Main = () => {
   };
 
   const generateChartData = () => {
-    if (!weatherData || !weatherData.weather) return {};
+    if (!forecastData || !forecastData.list) return {};
 
-    // Create dummy data for chart (example purposes)
-    const labels = ['12:00', '15:00', '18:00', '21:00'];
-    const data = [10, 20, 30, 40];  // Replace with actual data if needed
+    const labels = forecastData.list.slice(0, 8).map(item => item.dt_txt);
+    const data = forecastData.list.slice(0, 8).map(item => item.pop * 100);
 
     return {
       labels,
@@ -60,7 +69,7 @@ const Main = () => {
         {
           label: 'Chance of Rain (%)',
           data,
-          backgroundColor: 'rgba(54, 162, 235, 0.5)',  // More visible color
+          backgroundColor: 'rgba(54, 162, 235, 0.5)',
           borderColor: 'rgba(54, 162, 235, 1)',
           borderWidth: 2,
         },
@@ -75,7 +84,7 @@ const Main = () => {
       x: {
         beginAtZero: true,
         grid: {
-          display: true,  // Show grid lines
+          display: true,
         },
         ticks: {
           autoSkip: false,
@@ -84,11 +93,11 @@ const Main = () => {
       y: {
         beginAtZero: true,
         grid: {
-          display: true,  // Show grid lines
+          display: true,
         },
         ticks: {
-          callback: function(value) {
-            return value + '%';  // Add '%' sign to y-axis labels
+          callback: function (value) {
+            return value + '%';
           },
         },
       },
@@ -100,8 +109,8 @@ const Main = () => {
       },
       tooltip: {
         callbacks: {
-          label: function(tooltipItem) {
-            return tooltipItem.label + ': ' + tooltipItem.raw + '%';  // Add '%' sign to tooltips
+          label: function (tooltipItem) {
+            return tooltipItem.label + ': ' + tooltipItem.raw + '%';
           },
         },
       },
@@ -135,11 +144,36 @@ const Main = () => {
               </button>
             </div>
           </div>
+          <h2 className="mt-4 text-xl font-bold">Current Weather</h2>
+          {weatherData && (
+            <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
+              <div className="p-2 bg-blue-200 rounded-md">
+                <h3 className="text-sm font-semibold">Temperature</h3>
+                <p className="text-xs">{weatherData.main.temp}°C</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-md">
+                <h3 className="text-sm font-semibold">Humidity</h3>
+                <p className="text-xs">{weatherData.main.humidity}%</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-md">
+                <h3 className="text-sm font-semibold">Wind</h3>
+                <p className="text-xs">{weatherData.wind.speed} km/h</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-md">
+                <h3 className="text-sm font-semibold">Sunrise</h3>
+                <p className="text-xs">{new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-md">
+                <h3 className="text-sm font-semibold">Sunset</h3>
+                <p className="text-xs">{new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex-1 mt-4 lg:mt-0 lg:ml-4">
           <div className="mb-4">
             <h2 className="text-xl font-bold">Chances of Raining</h2>
-            <div className="h-48 p-4 bg-blue-200 rounded-md">  {/* Increased height */}
+            <div className="h-48 p-4 bg-blue-200 rounded-md">
               {loading ? (
                 <p>Loading...</p>
               ) : error ? (
@@ -149,58 +183,18 @@ const Main = () => {
               )}
             </div>
           </div>
-          <div>
+          <div className="mt-4">
             <h2 className="text-xl font-bold">3-Day Forecast</h2>
-            <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
-              <div className="p-2 bg-blue-200 rounded-md">
-                <h3 className="text-sm font-semibold">Day 1</h3>
-                <p className="text-xs">20% chance of rain</p>
+            {forecastData && (
+              <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
+                {forecastData.list.slice(0, 3).map((item, index) => (
+                  <div key={index} className="p-2 bg-blue-200 rounded-md">
+                    <h3 className="text-sm font-semibold">Day {index + 1}</h3>
+                    <p className="text-xs">{item.pop * 100}% chance of rain</p>
+                  </div>
+                ))}
               </div>
-              <div className="p-2 bg-blue-200 rounded-md">
-                <h3 className="text-sm font-semibold">Day 2</h3>
-                <p className="text-xs">10% chance of rain</p>
-              </div>
-              <div className="p-2 bg-blue-200 rounded-md">
-                <h3 className="text-sm font-semibold">Day 3</h3>
-                <p className="text-xs">30% chance of rain</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="mt-8">
-        <h2 className="text-xl font-bold">Today's highlights</h2>
-        <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="h-20 p-2 bg-blue-200 rounded-md">
-            <h3 className="text-sm font-semibold">Precipitation</h3>
-            <p className="text-xs">2%</p>
-          </div>
-          <div className="h-20 p-2 bg-blue-200 rounded-md">
-            <h3 className="text-sm font-semibold">Humidity</h3>
-            <p className="text-xs">87%</p>
-          </div>
-          <div className="h-20 p-2 bg-blue-200 rounded-md">
-            <h3 className="text-sm font-semibold">Wind</h3>
-            <p className="text-xs">0 km/hr</p>
-          </div>
-          <div className="h-20 p-2 bg-blue-200 rounded-md">
-            <h3 className="text-sm font-semibold">Sunrise & Sunset</h3>
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1">
-                <img src={assets.sunrise} className="w-4 h-4" alt="Sunrise" />
-                <p className="text-xs">6:18am</p>
-              </div>
-              <div className="flex items-center space-x-1">
-                <img src={assets.sunset} className="w-4 h-4" alt="Sunset" />
-                <p className="text-xs">7:27pm</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="h-64 p-4 mt-8 bg-blue-300 rounded-md">
-          <h3 className="text-xl font-semibold">Today Week</h3>
-          <div className="flex items-center justify-center h-full">
-            <p className="text-center">Image placeholder</p>
+            )}
           </div>
         </div>
       </div>
