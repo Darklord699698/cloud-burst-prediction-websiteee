@@ -1,6 +1,6 @@
 import React from 'react';
 import { assets } from "../assets/assets.js";
-
+//may not be needed lets see
 const Header = () => {
   return (
     <header className="flex items-center justify-between p-4 text-white bg-slate-200">
