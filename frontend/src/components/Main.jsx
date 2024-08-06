@@ -216,7 +216,9 @@ const Main = () => {
   };
 
   return (
+    
     <div className="p-4">
+      
       <p>Current location</p>
       <h1 className="text-2xl font-bold">{images[currentIndex].name}</h1>
       <div className="flex flex-col mt-4 lg:flex-row">
