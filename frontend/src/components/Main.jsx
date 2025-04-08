@@ -29,7 +29,7 @@ ChartJS.register(
 
 const images = [
   { src: "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/475000/475457-Los-Angeles.jpg", name: "Los Angeles", country: "US" },
-  { src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHqzvH-_xPZX57JgzjMeQFGrL95vuwBidNAQ&s", name: "New York", country: "US" },
+  { src: "https://media.cntraveller.com/photos/64f4fc5f663208f83a21af16/3:2/w_3000,h_2000,c_limit/New%20York%20City_GettyImages-1347979016.jpg", name: "New York", country: "US" },
   { src: "https://cdn.choosechicago.com/uploads/2019/06/general-contact-1800x900.jpg", name: "Chicago", country: "US" },
   // Add more images and names as needed
 ];
