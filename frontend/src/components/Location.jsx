@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaBookmark } from "react-icons/fa"; // Bookmark icon
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const cities = [
   { name: "New York", country: "US" },
@@ -103,7 +104,6 @@ const Location = () => {
     localStorage.setItem("bookmarkedCities", JSON.stringify(updated));
   };
 
-  // Get bookmarked city data from searchHistory
   const bookmarkedCitiesData = searchHistory.filter(city => bookmarks.includes(city.name));
 
   return (
@@ -162,29 +162,29 @@ const Location = () => {
         ))}
       </div>
 
-      {/* Multi-city comparison */}
+      {/* Multi-city comparison chart */}
       {searchHistory.length > 1 && (
         <div className="p-4 mt-6 bg-white rounded-lg shadow">
-          <h2 className="mb-4 text-2xl font-semibold">Past Searches / Multi-City Comparison</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {searchHistory.map((loc, idx) => (
-              <div key={idx} className="relative p-2 border rounded">
-                <h3 className="text-lg font-semibold">{loc.name}</h3>
-                {loc.weather && (
-                  <p>🌡 Temp: {loc.weather.main.temp}°C | 💧 Humidity: {loc.weather.main.humidity}% | 💨 Wind: {loc.weather.wind.speed} m/s</p>
-                )}
-                <button
-                  onClick={() => toggleBookmark(loc.name)}
-                  className={`absolute top-2 right-2 text-xl ${
-                    bookmarks.includes(loc.name) ? "text-yellow-400" : "text-gray-300"
-                  }`}
-                  title={bookmarks.includes(loc.name) ? "Remove Bookmark" : "Add Bookmark"}
-                >
-                  <FaBookmark />
-                </button>
-              </div>
-            ))}
-          </div>
+          <h2 className="mb-4 text-2xl font-semibold">Past Searches Comparison</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={searchHistory.map(city => ({
+                name: city.name,
+                temp: city.weather?.main.temp,
+                humidity: city.weather?.main.humidity,
+                wind: city.weather?.wind.speed,
+              }))}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="temp" fill="#8884d8" name="Temperature (°C)" />
+              <Bar dataKey="humidity" fill="#82ca9d" name="Humidity (%)" />
+              <Bar dataKey="wind" fill="#ffc658" name="Wind Speed (m/s)" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
 
