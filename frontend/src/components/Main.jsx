@@ -15,7 +15,6 @@ import axios from "axios";
 import "./ImageSlider.css";
 import { assets } from "../assets/assets";
 
-// Register the required components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -27,21 +26,80 @@ ChartJS.register(
   Legend
 );
 
+
 const images = [
   { src: "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/475000/475457-Los-Angeles.jpg", name: "Los Angeles", country: "US" },
   { src: "https://media.cntraveller.com/photos/64f4fc5f663208f83a21af16/3:2/w_3000,h_2000,c_limit/New%20York%20City_GettyImages-1347979016.jpg", name: "New York", country: "US" },
   { src: "https://cdn.choosechicago.com/uploads/2019/06/general-contact-1800x900.jpg", name: "Chicago", country: "US" },
-  // Add more images and names as needed
 ];
 
-const Main = () => {
+const Main = ({ searchedCity }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const apiKey = "7b3ffbfe64a1f83e9f112cb4896344ad"; // Replace with your actual API key
+  const apiKey = "7b3ffbfe64a1f83e9f112cb4896344ad";
+  const unsplashAccessKey = "3YqgeNBUUUQ2wMEY4zQUcwN-zyjxwxiv7HyOWcPXV48"; // <-- Replace with your Unsplash access key
+const [dynamicImage, setDynamicImage] = useState(null);
+
+
+useEffect(() => {
+  const fetchCityImage = async () => {
+    if (searchedCity) {
+      try {
+        const response = await axios.get(
+          `https://api.unsplash.com/search/photos`,
+          {
+            params: {
+              query: searchedCity + " city",
+              orientation: "landscape",
+              per_page: 1,
+            },
+            headers: {
+              Authorization: `Client-ID ${unsplashAccessKey}`,
+            },
+          }
+        );
+
+        if (response.data.results.length > 0) {
+          setDynamicImage({
+            src: response.data.results[0].urls.regular,
+            name: searchedCity,
+            country: "", // country is not required for display
+          });
+        } else {
+          setDynamicImage(null);
+        }
+      } catch (err) {
+        console.error("Failed to fetch image from Unsplash:", err);
+        setDynamicImage(null);
+      }
+    }
+  };
+
+  fetchCityImage();
+}, [searchedCity]);
+
+
+const displayImage = searchedCity
+? dynamicImage || images.find((img) => img.name.toLowerCase() === searchedCity.toLowerCase()) || images[currentIndex]
+: images[currentIndex];
+
+  useEffect(() => {
+    if (searchedCity) {
+      const index = images.findIndex(
+        (img) => img.name.toLowerCase() === searchedCity.toLowerCase()
+      );
+      if (index !== -1) {
+        setCurrentIndex(index);
+      }
+    }
+  }, [searchedCity]);
+  
+
+
 
   const getWeather = async (city, country) => {
     const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${apiKey}&units=metric`;
@@ -63,10 +121,10 @@ const Main = () => {
   };
 
   useEffect(() => {
-    // Fetch weather data for the default city when the component mounts
-    const { name, country } = images[currentIndex];
-    getWeather(name, country);
-  }, [currentIndex]); // Fetch data when currentIndex changes
+    if (displayImage) {
+      getWeather(displayImage.name, displayImage.country);
+    }
+  }, [currentIndex, searchedCity]);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -101,7 +159,6 @@ const Main = () => {
   const generateLineChartData = () => {
     if (!forecastData || !forecastData.list) return {};
 
-    // Create data for temperature timeline (example: next 12 hours)
     const labels = forecastData.list
       .slice(0, 13)
       .map((item) => new Date(item.dt * 1000).getHours() + "h");
@@ -126,16 +183,14 @@ const Main = () => {
   const generate3DayForecast = () => {
     if (!forecastData || !forecastData.list) return [];
 
-    // Process the forecast data for the next 3 days
-    const forecast = forecastData.list
+    return forecastData.list
       .filter((item) => item.dt_txt.includes("12:00:00"))
-      .slice(0, 3);
-
-    return forecast.map((day) => ({
-      date: new Date(day.dt * 1000).toLocaleDateString(),
-      temp: day.main.temp,
-      weather: day.weather[0].description,
-    }));
+      .slice(0, 3)
+      .map((day) => ({
+        date: new Date(day.dt * 1000).toLocaleDateString(),
+        temp: day.main.temp,
+        weather: day.weather[0].description,
+      }));
   };
 
   const chartOptions = {
@@ -143,36 +198,20 @@ const Main = () => {
     maintainAspectRatio: false,
     scales: {
       x: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-        },
-        ticks: {
-          autoSkip: false,
-        },
+        grid: { display: true },
+        ticks: { autoSkip: false },
       },
       y: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-        },
-        ticks: {
-          callback: function (value) {
-            return value + "%";
-          },
-        },
+        grid: { display: true },
+        ticks: { callback: (value) => value + "%" },
       },
     },
     plugins: {
-      legend: {
-        display: true,
-        position: "top",
-      },
+      legend: { display: true, position: "top" },
       tooltip: {
         callbacks: {
-          label: function (tooltipItem) {
-            return tooltipItem.label + ": " + tooltipItem.raw + "%";
-          },
+          label: (tooltipItem) =>
+            tooltipItem.label + ": " + tooltipItem.raw + "%",
         },
       },
     },
@@ -182,132 +221,99 @@ const Main = () => {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-        },
-      },
+      x: { grid: { display: true } },
       y: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-        },
-        ticks: {
-          callback: function (value) {
-            return value + "°C";
-          },
-        },
+        grid: { display: true },
+        ticks: { callback: (value) => value + "°C" },
       },
     },
     plugins: {
-      legend: {
-        display: true,
-        position: "top",
-      },
+      legend: { display: true, position: "top" },
       tooltip: {
         callbacks: {
-          label: function (tooltipItem) {
-            return tooltipItem.label + ": " + tooltipItem.raw + "°C";
-          },
+          label: (tooltipItem) =>
+            tooltipItem.label + ": " + tooltipItem.raw + "°C",
         },
       },
     },
   };
 
   return (
-    
-    <div className="p-4">
-      
+    <div className="relative w-full min-h-screen p-6">
       <p>Current location</p>
-      <h1 className="text-2xl font-bold">{images[currentIndex].name}</h1>
+      
+      <h1 className="text-2xl font-bold">{displayImage?.name}</h1>
       <div className="flex flex-col mt-4 lg:flex-row">
         <div className="flex-1">
           <div className="relative">
             <img
-              src={images[currentIndex].src}
-              alt={images[currentIndex].name}
+              src={displayImage?.src}
+              alt={displayImage?.name}
               className="object-cover w-full rounded-md h-80 fade"
             />
-            <div className="absolute inset-0 flex items-center justify-between px-4 py-2">
-              <button
-                onClick={handlePrevious}
-                className="px-4 py-2 text-white bg-gray-500 rounded"
-              >
-                Previous
-              </button>
-              <button
-                onClick={handleNext}
-                className="px-4 py-2 text-white bg-gray-500 rounded"
-              >
-                Next
-              </button>
-            </div>
+            {!searchedCity && (
+              <div className="absolute inset-0 flex items-center justify-between px-4 py-2">
+                <button
+                  onClick={handlePrevious}
+                  className="px-4 py-2 text-white bg-gray-500 rounded"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-2 text-white bg-gray-500 rounded"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
+
           <h2 className="mt-4 text-xl font-bold">Current Weather</h2>
           {weatherData && (
             <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
               <div className="flex items-center p-2 bg-blue-200 rounded-md">
-                <img
-                  src={assets.thermometer}
-                  alt="Temperature Icon"
-                  className="w-6 h-6 mr-2"
-                />
+                <img src={assets.thermometer} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Temperature</h3>
                   <p className="text-xs">{weatherData.main.temp}°C</p>
                 </div>
               </div>
               <div className="flex items-center p-2 bg-blue-200 rounded-md">
-                <img
-                  src={assets.humidity}
-                  alt="Humidity Icon"
-                  className="w-6 h-6 mr-2"
-                />
+                <img src={assets.humidity} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Humidity</h3>
                   <p className="text-xs">{weatherData.main.humidity}%</p>
                 </div>
               </div>
               <div className="flex items-center p-2 bg-blue-200 rounded-md">
-                <img src={assets.wind} alt="Wind Icon" className="w-6 h-6 mr-2" />
+                <img src={assets.wind} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Wind</h3>
                   <p className="text-xs">{weatherData.wind.speed} km/h</p>
                 </div>
               </div>
               <div className="flex items-center p-2 bg-blue-200 rounded-md">
-                <img
-                  src={assets.sunset}
-                  alt="Sunrise Icon"
-                  className="w-6 h-6 mr-2"
-                />
+                <img src={assets.sunrise} className="w-6 h-6 mr-2" />
                 <div>
-                  <h3 className="text-sm font-semibold">Sunset</h3>
+                  <h3 className="text-sm font-semibold">Sunrise</h3>
                   <p className="text-xs">
-                    {new Date(
-                      weatherData.sys.sunrise * 1000
-                    ).toLocaleTimeString()}
+                    {new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}
                   </p>
                 </div>
               </div>
               <div className="flex items-center p-2 bg-blue-200 rounded-md">
-                <img
-                  src={assets.sunrise}
-                  alt="Sunset Icon"
-                  className="w-6 h-6 mr-2"
-                />
+                <img src={assets.sunset} className="w-6 h-6 mr-2" />
                 <div>
-                  <h3 className="text-sm font-semibold">Sunrise</h3>
+                  <h3 className="text-sm font-semibold">Sunset</h3>
                   <p className="text-xs">
-                    {new Date(
-                      weatherData.sys.sunset * 1000
-                    ).toLocaleTimeString()}
+                    {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}
                   </p>
                 </div>
               </div>
             </div>
           )}
+
           <h2 className="mt-4 text-xl font-bold">3-Day Forecast</h2>
           {forecastData && (
             <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
@@ -321,6 +327,7 @@ const Main = () => {
             </div>
           )}
         </div>
+
         <div className="flex-1 mt-4 lg:mt-0 lg:ml-4">
           <div className="mb-4">
             <h2 className="text-xl font-bold">Chances of Raining</h2>
@@ -342,10 +349,7 @@ const Main = () => {
               ) : error ? (
                 <p>{error}</p>
               ) : (
-                <Line
-                  data={generateLineChartData()}
-                  options={lineChartOptions}
-                />
+                <Line data={generateLineChartData()} options={lineChartOptions} />
               )}
             </div>
           </div>

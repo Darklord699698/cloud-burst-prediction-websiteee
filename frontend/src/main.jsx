@@ -1,14 +1,21 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client'; // Use 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'; // Import BrowserRouter
-import App from './App';
-import './index.css'; // Ensure you have your global styles here
+// main.jsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { ClerkProvider } from "@clerk/clerk-react"; // ✅ Import ClerkProvider
+import App from "./App";
+import "./index.css";
 
-const root = ReactDOM.createRoot(document.getElementById('root')); // Create a root
+// ✅ Replace with your actual Clerk frontend API key from Clerk dashboard
+const clerkFrontendApi = "pk_test_YXB0LXRyZWVmcm9nLTc4LmNsZXJrLmFjY291bnRzLmRldiQ";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <BrowserRouter> {/* Wrap your application with BrowserRouter */}
-      <App />
-    </BrowserRouter>
+    <ClerkProvider publishableKey={clerkFrontendApi}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ClerkProvider>
   </React.StrictMode>
 );

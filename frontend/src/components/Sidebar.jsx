@@ -1,37 +1,78 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { assets } from '../assets/assets';  // Adjust the path as needed
+// Sidebar.jsx
+import React, { useState } from "react";
+import { Menu, X } from "lucide-react"; // icons
+import { assets } from "../assets/assets"; // Adjust path if needed
 
-const Sidebar = () => {
+const Sidebar = ({ onNavigate }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="fixed top-0 left-0 z-10 w-64 h-full bg-cyan-300">
-      <ul className="flex flex-col h-full gap-8 p-4 mt-24 text-center">
-        <li className="flex items-center mb-4 ml-10">
-          <img src={assets.home} alt="Home" className="w-6 h-6 mr-2" />  {/* Adjust the icon size as needed */}
-          <Link to="/" className="text-white">Home</Link>
-        </li>
-        <li className="flex items-center mb-4 ml-10">
-          <img src={assets.forecast} alt="Forecast" className="w-6 h-6 mr-2" />
-          <Link to="/Forecast" className="text-white">Forecast</Link>
-        </li>
-        <li className="flex items-center mb-4 ml-10">
-          <img src={assets.location} alt="Location" className="w-6 h-6 mr-2" />
-          <Link to="/Location" className="text-white">Location</Link>
-        </li>
-        <li className="flex items-center mb-4 ml-10">
-          <img src={assets.Analytics} alt="Analytics" className="w-6 h-6 mr-2" />
-          <Link to="/Analytics" className="text-white">Analytics</Link>
-        </li>
-        <li className="flex items-center mb-4 ml-10">
-          <img src={assets.calendar} alt="Calendar" className="w-6 h-6 mr-2" />
-          <Link to="/Calendar" className="text-white">Calendar</Link>
-        </li>
-        <li className="flex items-center mb-4 ml-10">
-          <img src={assets.settings} alt="Settings" className="w-6 h-6 mr-2" />
-          <Link to="/Settings" className="text-white">Settings</Link>
-        </li>
-      </ul>
-    </div>
+    <>
+      {/* Hamburger Button */}
+      <button
+        className="fixed z-20 p-2 text-white rounded-md top-4 left-4 bg-cyan-500 hover:bg-cyan-600"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 z-10 w-64 h-full bg-cyan-300 transform transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <ul className="flex flex-col h-full gap-8 p-4 mt-24 text-center">
+          <li
+            className="flex items-center mb-4 ml-10 cursor-pointer hover:opacity-80"
+            onClick={() => onNavigate("home")}
+          >
+            <img src={assets.home} alt="Home" className="w-6 h-6 mr-2" />
+            <span className="text-white">Home</span>
+          </li>
+
+          <li
+            className="flex items-center mb-4 ml-10 cursor-pointer hover:opacity-80"
+            onClick={() => onNavigate("forecast")}
+          >
+            <img src={assets.forecast} alt="Forecast" className="w-6 h-6 mr-2" />
+            <span className="text-white">Forecast</span>
+          </li>
+
+          <li
+            className="flex items-center mb-4 ml-10 cursor-pointer hover:opacity-80"
+            onClick={() => onNavigate("location")}
+          >
+            <img src={assets.location} alt="Location" className="w-6 h-6 mr-2" />
+            <span className="text-white">Location</span>
+          </li>
+
+          <li
+            className="flex items-center mb-4 ml-10 cursor-pointer hover:opacity-80"
+            onClick={() => onNavigate("analytics")}
+          >
+            <img src={assets.Analytics} alt="Analytics" className="w-6 h-6 mr-2" />
+            <span className="text-white">Analytics</span>
+          </li>
+
+          <li
+            className="flex items-center mb-4 ml-10 cursor-pointer hover:opacity-80"
+            onClick={() => onNavigate("calendar")}
+          >
+            <img src={assets.calendar} alt="Calendar" className="w-6 h-6 mr-2" />
+            <span className="text-white">Calendar</span>
+          </li>
+
+          <li
+            className="flex items-center mb-4 ml-10 cursor-pointer hover:opacity-80"
+            onClick={() => onNavigate("settings")}
+          >
+            <img src={assets.settings} alt="Settings" className="w-6 h-6 mr-2" />
+            <span className="text-white">Settings</span>
+          </li>
+        </ul>
+      </div>
+    </>
   );
 };
 
