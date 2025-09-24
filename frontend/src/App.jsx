@@ -5,8 +5,8 @@ import Sidebar from './components/Sidebar';
 import Location from './components/Location';
 import Forecast from './components/Forecast';
 import Analytics from './components/Analytics';
-import CalendarPage from './components/Calendar'; // ✅ Import Calendar
-import SettingsPage from './components/Settings'; // ✅ Import Settings
+import CalendarPage from './components/Calendar';
+import SettingsPage from './components/Settings';
 
 const App = () => {
   const [searchedCity, setSearchedCity] = useState(null);
@@ -14,7 +14,9 @@ const App = () => {
 
   return (
     <div>
-      <Header onSearch={setSearchedCity} />
+      {/* Show Header only on the home page */}
+      {activePage === 'home' && <Header onSearch={setSearchedCity} />}
+
       <div className="flex">
         <Sidebar onNavigate={setActivePage} />
         <div className="w-full p-6 ml-64">
@@ -22,8 +24,8 @@ const App = () => {
           {activePage === 'location' && <Location />}
           {activePage === 'forecast' && <Forecast searchedCity={searchedCity} />}
           {activePage === 'analytics' && <Analytics searchedCity={searchedCity} />}
-          {activePage === 'calendar' && <CalendarPage />} {/* ✅ Added Calendar */}
-          {activePage === 'settings' && <SettingsPage />} {/* ✅ Added Settings */}
+          {activePage === 'calendar' && <CalendarPage />}
+          {activePage === 'settings' && <SettingsPage />}
         </div>
       </div>
     </div>
