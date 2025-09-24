@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Sun, Moon, Thermometer, Bell, RefreshCw } from "lucide-react";
+import { ThemeContext } from "../components/ThemeContext";
 
 const SettingsPage = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, setDarkMode } = useContext(ThemeContext); // ✅ inside component
   const [celsius, setCelsius] = useState(true);
   const [notifications, setNotifications] = useState(true);
 
-  // Apply/remove dark mode class on <html>
+  // Apply/remove dark mode class on <html> (optional, since ThemeContext can handle this globally)
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -23,11 +24,7 @@ const SettingsPage = () => {
         {/* Theme */}
         <div className="flex items-center justify-between p-4 transition-colors duration-300 shadow bg-gray-50 dark:bg-gray-800 rounded-xl">
           <div className="flex items-center gap-3">
-            {darkMode ? (
-              <Moon className="text-gray-200" />
-            ) : (
-              <Sun className="text-yellow-400" />
-            )}
+            {darkMode ? <Moon className="text-gray-200" /> : <Sun className="text-yellow-400" />}
             <p className="font-medium">Dark Mode</p>
           </div>
 

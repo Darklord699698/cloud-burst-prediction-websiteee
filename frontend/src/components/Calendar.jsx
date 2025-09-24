@@ -1,24 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css"; // basic styles
+import "react-calendar/dist/Calendar.css";
 import { Plus, Trash2 } from "lucide-react";
 
 const CalendarPage = () => {
   const [date, setDate] = useState(new Date());
-  const [events, setEvents] = useState({
-    "2025-08-30": [{ title: "Trip to Bengaluru" }],
-    "2025-08-31": [{ title: "Cloudburst Alert" }],
-  });
+  const [events, setEvents] = useState({});
+  const [showInput, setShowInput] = useState(false);
+  const [newEvent, setNewEvent] = useState("");
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [newEvent, setNewEvent] = useState("");
-  const [showInput, setShowInput] = useState(false);
+  const [mounted, setMounted] = useState(false); // check client-side
 
   const dateKey = date.toISOString().split("T")[0];
 
-  const handleAddEvent = () => {
-    setShowInput(true);
-  };
+  // 1. Run only on client
+  useEffect(() => {
+    setMounted(true); // component mounted
+    const savedEvents = localStorage.getItem("calendarEvents");
+    if (savedEvents) {
+      setEvents(JSON.parse(savedEvents));
+    } else {
+      const defaultEvents = {
+        "2025-08-30": [{ title: "Trip to Bengaluru" }],
+        "2025-08-31": [{ title: "Cloudburst Alert" }],
+      };
+      setEvents(defaultEvents);
+      localStorage.setItem("calendarEvents", JSON.stringify(defaultEvents));
+    }
+  }, []);
+
+  // 2. Save to localStorage whenever events change
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem("calendarEvents", JSON.stringify(events));
+    }
+  }, [events, mounted]);
 
   const handleSaveEvent = () => {
     if (!newEvent.trim()) return;
@@ -49,6 +66,8 @@ const CalendarPage = () => {
     setDeleteIndex(null);
   };
 
+  if (!mounted) return null; // don't render until mounted
+
   return (
     <div className="min-h-screen p-6 bg-slate-50">
       <div className="max-w-4xl mx-auto">
@@ -60,7 +79,7 @@ const CalendarPage = () => {
               {date.toLocaleString("default", { month: "long", year: "numeric" })}
             </h2>
             <button
-              onClick={handleAddEvent}
+              onClick={() => setShowInput(true)}
               className="flex items-center gap-2 px-4 py-2 text-black transition shadow bg-white/90 rounded-xl hover:scale-105"
             >
               <Plus size={16} /> Add Event
@@ -76,7 +95,7 @@ const CalendarPage = () => {
               if (events[key]) {
                 return (
                   <div className="flex justify-center mt-1 space-x-1">
-                    {events[key].map((e, i) => (
+                    {events[key].map((_, i) => (
                       <span key={i} className="w-2 h-2 bg-blue-500 rounded-full"></span>
                     ))}
                   </div>
@@ -86,7 +105,6 @@ const CalendarPage = () => {
             }}
           />
 
-          {/* Input bar for new event */}
           {showInput && (
             <div className="flex gap-2 mt-4">
               <input
@@ -95,9 +113,7 @@ const CalendarPage = () => {
                 onChange={(e) => setNewEvent(e.target.value)}
                 placeholder="Enter event title..."
                 className="flex-1 px-4 py-2 border rounded-xl focus:outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveEvent();
-                }}
+                onKeyDown={(e) => e.key === "Enter" && handleSaveEvent()}
               />
               <button
                 onClick={handleSaveEvent}
@@ -134,7 +150,6 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40">
           <div className="p-6 text-center bg-white rounded-lg shadow-lg w-80">
