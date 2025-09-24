@@ -1,6 +1,6 @@
-// Location.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { FaBookmark } from "react-icons/fa"; // Bookmark icon
 
 const cities = [
   { name: "New York", country: "US" },
@@ -14,6 +14,12 @@ const UNSPLASH_KEY = "3YqgeNBUUUQ2wMEY4zQUcwN-zyjxwxiv7HyOWcPXV48";
 const Location = () => {
   const [locationsData, setLocationsData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [bookmarks, setBookmarks] = useState(
+    JSON.parse(localStorage.getItem("bookmarkedCities")) || []
+  );
+  const [searchHistory, setSearchHistory] = useState(
+    JSON.parse(localStorage.getItem("searchHistory")) || []
+  );
 
   useEffect(() => {
     fetchMultipleCities(cities);
@@ -32,6 +38,18 @@ const Location = () => {
     }
   };
 
+  const fetchCityDescription = async (city) => {
+    try {
+      const wikiRes = await axios.get(
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${city}`
+      );
+      return wikiRes.data.extract || `${city} is a wonderful place with its unique culture and history.`;
+    } catch (err) {
+      console.error(`Error fetching description for ${city}:`, err);
+      return `${city} is a wonderful place with its unique culture and history.`;
+    }
+  };
+
   const fetchCityData = async (name, country = "") => {
     try {
       const weatherRes = await axios.get(
@@ -44,12 +62,14 @@ const Location = () => {
         `https://api.unsplash.com/search/photos?query=${name}&client_id=${UNSPLASH_KEY}&per_page=1`
       );
 
+      const description = await fetchCityDescription(name);
+
       return {
         name,
         country: country || weatherRes.data.sys.country,
         weather: weatherRes.data,
         image: imgRes.data.results[0]?.urls?.regular,
-        description: getCityDescription(name),
+        description,
       };
     } catch (err) {
       console.error(`Error fetching data for ${name}:`, err);
@@ -57,28 +77,34 @@ const Location = () => {
     }
   };
 
-  const getCityDescription = (city) => {
-    switch (city) {
-      case "New York":
-        return "New York City, known as 'The Big Apple', is a bustling hub for culture, finance, and architecture.";
-      case "Tokyo":
-        return "Tokyo, Japan’s capital, blends ultramodern skyscrapers with traditional temples and vibrant street life.";
-      case "Paris":
-        return "Paris, the capital of France, is famed for its romantic charm, art museums, and the iconic Eiffel Tower.";
-      default:
-        return `${city} is a wonderful place with its own unique culture, history, and charm.`;
-    }
-  };
-
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
+
     const cityData = await fetchCityData(searchQuery.trim());
     if (cityData) {
-      setLocationsData([cityData]); // Replace with searched city
+      setLocationsData([cityData]);
+
+      const updatedHistory = [cityData, ...searchHistory.filter(c => c.name !== cityData.name)];
+      setSearchHistory(updatedHistory);
+      localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
     }
     setSearchQuery("");
   };
+
+  const toggleBookmark = (cityName) => {
+    let updated;
+    if (bookmarks.includes(cityName)) {
+      updated = bookmarks.filter((b) => b !== cityName);
+    } else {
+      updated = [...bookmarks, cityName];
+    }
+    setBookmarks(updated);
+    localStorage.setItem("bookmarkedCities", JSON.stringify(updated));
+  };
+
+  // Get bookmarked city data from searchHistory
+  const bookmarkedCitiesData = searchHistory.filter(city => bookmarks.includes(city.name));
 
   return (
     <div className="p-6">
@@ -101,35 +127,90 @@ const Location = () => {
         </button>
       </form>
 
-      {/* Cards */}
+      {/* Display searched or default cities */}
       <div className="grid gap-6 md:grid-cols-3">
         {locationsData.map((loc, index) => (
-          <div
-            key={index}
-            className="overflow-hidden bg-white rounded-lg shadow-lg"
-          >
-            {loc.image && (
-              <img
-                src={loc.image}
-                alt={loc.name}
-                className="object-cover w-full h-48"
-              />
-            )}
+          <div key={index} className="relative overflow-hidden bg-white rounded-lg shadow-lg">
+            {loc.image && <img src={loc.image} alt={loc.name} className="object-cover w-full h-48" />}
+            <button
+              onClick={() => toggleBookmark(loc.name)}
+              className={`absolute top-2 right-2 text-xl ${
+                bookmarks.includes(loc.name) ? "text-yellow-400" : "text-gray-300"
+              }`}
+              title={bookmarks.includes(loc.name) ? "Remove Bookmark" : "Add Bookmark"}
+            >
+              <FaBookmark />
+            </button>
             <div className="p-4">
-              <h2 className="mb-2 text-xl font-semibold">
-                {loc.name}, {loc.country}
-              </h2>
+              <h2 className="mb-2 text-xl font-semibold">{loc.name}, {loc.country}</h2>
               {loc.weather && (
-                <p className="mb-2">
-                  🌡 Temp: {loc.weather.main.temp}°C |{" "}
-                  {loc.weather.weather[0].description}
-                </p>
+                <div className="flex flex-wrap gap-2 mb-2 text-sm">
+                  <span>🌡 {loc.weather.main.temp}°C</span>
+                  <span>💧 {loc.weather.main.humidity}% Humidity</span>
+                  <span>💨 {loc.weather.wind.speed} m/s</span>
+                </div>
               )}
-              <p className="text-gray-700">{loc.description}</p>
+              <p className="mb-2 text-gray-700">{loc.description}</p>
+              <iframe
+                width="100%"
+                height="150"
+                className="rounded-lg"
+                src={`https://maps.google.com/maps?q=${loc.name}&output=embed`}
+              ></iframe>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Multi-city comparison */}
+      {searchHistory.length > 1 && (
+        <div className="p-4 mt-6 bg-white rounded-lg shadow">
+          <h2 className="mb-4 text-2xl font-semibold">Past Searches / Multi-City Comparison</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {searchHistory.map((loc, idx) => (
+              <div key={idx} className="relative p-2 border rounded">
+                <h3 className="text-lg font-semibold">{loc.name}</h3>
+                {loc.weather && (
+                  <p>🌡 Temp: {loc.weather.main.temp}°C | 💧 Humidity: {loc.weather.main.humidity}% | 💨 Wind: {loc.weather.wind.speed} m/s</p>
+                )}
+                <button
+                  onClick={() => toggleBookmark(loc.name)}
+                  className={`absolute top-2 right-2 text-xl ${
+                    bookmarks.includes(loc.name) ? "text-yellow-400" : "text-gray-300"
+                  }`}
+                  title={bookmarks.includes(loc.name) ? "Remove Bookmark" : "Add Bookmark"}
+                >
+                  <FaBookmark />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bookmarked / Favorites Section */}
+      {bookmarkedCitiesData.length > 0 && (
+        <div className="p-4 mt-6 bg-white rounded-lg shadow">
+          <h2 className="mb-4 text-2xl font-semibold">Favorites</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {bookmarkedCitiesData.map((loc, idx) => (
+              <div key={idx} className="relative p-2 border rounded">
+                <h3 className="text-lg font-semibold">{loc.name}</h3>
+                {loc.weather && (
+                  <p>🌡 Temp: {loc.weather.main.temp}°C | 💧 Humidity: {loc.weather.main.humidity}% | 💨 Wind: {loc.weather.wind.speed} m/s</p>
+                )}
+                <button
+                  onClick={() => toggleBookmark(loc.name)}
+                  className={`absolute top-2 right-2 text-xl text-yellow-400`}
+                  title="Remove Bookmark"
+                >
+                  <FaBookmark />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
