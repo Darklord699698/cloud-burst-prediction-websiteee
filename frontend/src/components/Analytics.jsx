@@ -1,5 +1,5 @@
 // src/components/Analytics.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   LineChart,
@@ -21,18 +21,41 @@ import {
 } from "lucide-react";
 
 const OPENWEATHER_KEY = "7b3ffbfe64a1f83e9f112cb4896344ad";
-const UNSPLASH_KEY = "3YqgeNBUUUQ2wMEY4zQUcwN-zyjxwxiv7HyOWcPXV48"; // Replace with your Unsplash API key
+const UNSPLASH_KEY = "3YqgeNBUUUQ2wMEY4zQUcwN-zyjxwxiv7HyOWcPXV48";
 
 const Analytics = () => {
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [current, setCurrent] = useState(null); // current weather
-  const [forecast, setForecast] = useState(null); // forecast.list
+  const [current, setCurrent] = useState(null);
+  const [forecast, setForecast] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [bgImage, setBgImage] = useState(null); // Unsplash image
+  const [bgImage, setBgImage] = useState(null);
 
-  // Helper: fetch weather + Unsplash image
+  // Load persisted state from localStorage
+  useEffect(() => {
+    const savedCity = localStorage.getItem("analytics_city");
+    const savedCurrent = localStorage.getItem("analytics_current");
+    const savedForecast = localStorage.getItem("analytics_forecast");
+    const savedLastUpdated = localStorage.getItem("analytics_lastUpdated");
+    const savedBgImage = localStorage.getItem("analytics_bgImage");
+
+    if (savedCity) setCity(savedCity);
+    if (savedCurrent) setCurrent(JSON.parse(savedCurrent));
+    if (savedForecast) setForecast(JSON.parse(savedForecast));
+    if (savedLastUpdated) setLastUpdated(savedLastUpdated);
+    if (savedBgImage) setBgImage(savedBgImage);
+  }, []);
+
+  // Persist state to localStorage
+  const persistState = (cityName, cur, fcast, bgImg) => {
+    localStorage.setItem("analytics_city", cityName);
+    localStorage.setItem("analytics_current", JSON.stringify(cur));
+    localStorage.setItem("analytics_forecast", JSON.stringify(fcast));
+    localStorage.setItem("analytics_lastUpdated", new Date().toLocaleString());
+    localStorage.setItem("analytics_bgImage", bgImg);
+  };
+
   const fetchData = async (cityName) => {
     if (!cityName) return;
     if (!OPENWEATHER_KEY) {
@@ -43,7 +66,6 @@ const Analytics = () => {
     setError(null);
 
     try {
-      // current weather
       const curResp = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
           cityName
@@ -52,7 +74,6 @@ const Analytics = () => {
       if (!curResp.ok) throw new Error("City not found (current).");
       const curJson = await curResp.json();
 
-      // forecast (3-hourly, 5 day)
       const forResp = await fetch(
         `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
           cityName
@@ -61,11 +82,7 @@ const Analytics = () => {
       if (!forResp.ok) throw new Error("City not found (forecast).");
       const forJson = await forResp.json();
 
-      setCurrent(curJson);
-      setForecast(forJson);
-      setLastUpdated(new Date().toLocaleString());
-
-      // Fetch Unsplash image
+      let bgImg = null;
       const imgResp = await fetch(
         `https://api.unsplash.com/photos/random?query=${encodeURIComponent(
           cityName
@@ -73,10 +90,15 @@ const Analytics = () => {
       );
       if (imgResp.ok) {
         const imgData = await imgResp.json();
-        setBgImage(imgData.urls.regular);
-      } else {
-        setBgImage(null);
+        bgImg = imgData.urls.regular;
       }
+
+      setCurrent(curJson);
+      setForecast(forJson);
+      setLastUpdated(new Date().toLocaleString());
+      setBgImage(bgImg);
+
+      persistState(cityName, curJson, forJson, bgImg);
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to fetch data");
@@ -162,14 +184,13 @@ const Analytics = () => {
       {/* HERO */}
       <div
         className="relative h-56 overflow-hidden shadow-md rounded-b-2xl"
-        aria-hidden={false}
         style={{
-            backgroundImage: current
-              ? `linear-gradient(rgba(6,6,23,0.45), rgba(6,6,23,0.45)), url(${bgImage})`
-              : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}          
+          backgroundImage: current
+            ? `linear-gradient(rgba(6,6,23,0.45), rgba(6,6,23,0.45)), url(${bgImage})`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
         <div className="absolute inset-0 flex items-center justify-between px-6">
