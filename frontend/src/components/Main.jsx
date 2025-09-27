@@ -193,22 +193,45 @@ const displayImage = searchedCity
       }));
   };
 
+  const isDarkMode = document.documentElement.classList.contains("dark");
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: {
-        grid: { display: true },
-        ticks: { autoSkip: false },
+        grid: { 
+          display: true, 
+          color: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.1)' 
+        },
+        ticks: { 
+          autoSkip: false,
+          color: isDarkMode ? '#E5E7EB' : '#1F2937' // dark gray for light mode
+        },
       },
       y: {
-        grid: { display: true },
-        ticks: { callback: (value) => value + "%" },
+        grid: { 
+          display: true, 
+          color: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.1)' 
+        },
+        ticks: { 
+          color: isDarkMode ? '#E5E7EB' : '#1F2937', 
+          callback: (value) => value + "%"
+        },
       },
     },
     plugins: {
-      legend: { display: true, position: "top" },
+      legend: { 
+        display: true, 
+        position: "top",
+        labels: {
+          color: isDarkMode ? '#E5E7EB' : '#1F2937'
+        }
+      },
       tooltip: {
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        backgroundColor: isDarkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(243, 244, 246, 0.95)',
         callbacks: {
           label: (tooltipItem) =>
             tooltipItem.label + ": " + tooltipItem.raw + "%",
@@ -216,30 +239,38 @@ const displayImage = searchedCity
       },
     },
   };
-
+  
   const lineChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: { grid: { display: true } },
+      x: {
+        grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
+        ticks: { color: isDarkMode ? '#E5E7EB' : '#1F2937' }
+      },
       y: {
-        grid: { display: true },
-        ticks: { callback: (value) => value + "°C" },
+        grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
+        ticks: { color: isDarkMode ? '#E5E7EB' : '#1F2937', callback: (value) => value + "°C" }
       },
     },
     plugins: {
-      legend: { display: true, position: "top" },
+      legend: { labels: { color: isDarkMode ? '#E5E7EB' : '#1F2937' } },
       tooltip: {
+        titleColor: isDarkMode ? '#ffffff' : '#111827',
+        bodyColor: isDarkMode ? '#ffffff' : '#111827',
+        backgroundColor: isDarkMode ? 'rgba(55,65,81,0.9)' : 'rgba(243,244,246,0.95)',
         callbacks: {
-          label: (tooltipItem) =>
-            tooltipItem.label + ": " + tooltipItem.raw + "°C",
+          label: (tooltipItem) => tooltipItem.label + ": " + tooltipItem.raw + "°C",
         },
       },
     },
   };
+  
 
   return (
-    <div className="relative w-full min-h-screen p-6">
+    <div className="relative w-full min-h-screen p-6 text-gray-900 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100 rounded-xl">
+
+
       <p>Current location</p>
       
       <h1 className="text-2xl font-bold">{displayImage?.name}</h1>
@@ -272,28 +303,28 @@ const displayImage = searchedCity
           <h2 className="mt-4 text-xl font-bold">Current Weather</h2>
           {weatherData && (
             <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
-              <div className="flex items-center p-2 bg-blue-200 rounded-md">
+              <div className="flex items-center p-2 transition-colors duration-300 bg-blue-200 rounded-md dark:bg-blue-800">
                 <img src={assets.thermometer} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Temperature</h3>
                   <p className="text-xs">{weatherData.main.temp}°C</p>
                 </div>
               </div>
-              <div className="flex items-center p-2 bg-blue-200 rounded-md">
+              <div className="flex items-center p-2 transition-colors duration-300 bg-blue-200 rounded-md dark:bg-blue-800">
                 <img src={assets.humidity} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Humidity</h3>
                   <p className="text-xs">{weatherData.main.humidity}%</p>
                 </div>
               </div>
-              <div className="flex items-center p-2 bg-blue-200 rounded-md">
+              <div className="flex items-center p-2 transition-colors duration-300 bg-blue-200 rounded-md dark:bg-blue-800">
                 <img src={assets.wind} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Wind</h3>
                   <p className="text-xs">{weatherData.wind.speed} km/h</p>
                 </div>
               </div>
-              <div className="flex items-center p-2 bg-blue-200 rounded-md">
+              <div className="flex items-center p-2 transition-colors duration-300 bg-blue-200 rounded-md dark:bg-blue-800">
                 <img src={assets.sunrise} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Sunrise</h3>
@@ -302,7 +333,7 @@ const displayImage = searchedCity
                   </p>
                 </div>
               </div>
-              <div className="flex items-center p-2 bg-blue-200 rounded-md">
+              <div className="flex items-center p-2 transition-colors duration-300 bg-blue-200 rounded-md dark:bg-blue-800">
                 <img src={assets.sunset} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Sunset</h3>
@@ -314,24 +345,36 @@ const displayImage = searchedCity
             </div>
           )}
 
-          <h2 className="mt-4 text-xl font-bold">3-Day Forecast</h2>
-          {forecastData && (
-            <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
-              {generate3DayForecast().map((day, index) => (
-                <div key={index} className="p-2 bg-blue-200 rounded-md">
-                  <h3 className="text-sm font-semibold">{day.date}</h3>
-                  <p className="text-xs">Temp: {day.temp}°C</p>
-                  <p className="text-xs">Weather: {day.weather}</p>
-                </div>
-              ))}
-            </div>
-          )}
+<h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+  3-Day Forecast
+</h2>
+{forecastData && (
+  <div className="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-3">
+    {generate3DayForecast().map((day, index) => (
+      <div
+        key={index}
+        className="p-2 transition-colors duration-300 bg-blue-200 rounded-md dark:bg-blue-800"
+      >
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {day.date}
+        </h3>
+        <p className="text-xs text-gray-800 dark:text-gray-200">
+          Temp: {day.temp}°C
+        </p>
+        <p className="text-xs text-gray-800 dark:text-gray-200">
+          Weather: {day.weather}
+        </p>
+      </div>
+    ))}
+  </div>
+)}
+
         </div>
 
         <div className="flex-1 mt-4 lg:mt-0 lg:ml-4">
           <div className="mb-4">
             <h2 className="text-xl font-bold">Chances of Raining</h2>
-            <div className="h-48 p-4 bg-pink-200 rounded-md">
+            <div className="h-48 p-4 transition-colors duration-300 bg-pink-200 rounded-md dark:bg-pink-900">
               {loading ? (
                 <p>Loading...</p>
               ) : error ? (
@@ -343,7 +386,7 @@ const displayImage = searchedCity
           </div>
           <div className="mb-4">
             <h2 className="text-xl font-bold">Temperature Timeline</h2>
-            <div className="h-64 p-4 bg-teal-300 rounded-md">
+            <div className="h-64 p-4 transition-colors duration-300 bg-teal-300 rounded-md dark:bg-teal-900">
               {loading ? (
                 <p>Loading...</p>
               ) : error ? (

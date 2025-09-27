@@ -1,23 +1,26 @@
-import React, { useState, useEffect, useContext } from "react";
+// src/pages/Settings.jsx
+import React, { useState } from "react";
 import { Sun, Moon, Thermometer, Bell, RefreshCw } from "lucide-react";
-import { ThemeContext } from "../components/ThemeContext";
+import { useTheme } from "../components/ThemeContext";
 
 const SettingsPage = () => {
-  const { darkMode, setDarkMode } = useContext(ThemeContext); // ✅ inside component
+  const { darkMode, setDarkMode } = useTheme();
   const [celsius, setCelsius] = useState(true);
-  const [notifications, setNotifications] = useState(true);
+  // In Settings.jsx
+const [notifications, setNotifications] = useState(
+  localStorage.getItem("notificationsEnabled") === "false" ? false : true
+);
 
-  // Apply/remove dark mode class on <html> (optional, since ThemeContext can handle this globally)
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
+const handleNotificationsToggle = () => {
+  setNotifications(!notifications);
+  localStorage.setItem("notificationsEnabled", !notifications);
+};
+
+
 
   return (
-    <div className="min-h-screen p-6 text-gray-900 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 dark:text-gray-100">
+    <div className="min-h-screen p-6 overflow-hidden text-gray-900 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 dark:text-gray-100 rounded-2xl">
+
       <div className="max-w-3xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Settings</h1>
 
@@ -28,19 +31,31 @@ const SettingsPage = () => {
             <p className="font-medium">Dark Mode</p>
           </div>
 
-          {/* Circle toggle switch */}
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300 ${
-              darkMode ? "bg-gray-600" : "bg-gray-300"
-            }`}
+          {/* Accessible toggle */}
+          <label
+            className={`inline-flex items-center cursor-pointer`}
+            aria-label="Toggle dark mode"
           >
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={darkMode}
+              onChange={() => setDarkMode(!darkMode)}
+            />
             <div
-              className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
-                darkMode ? "translate-x-6" : "translate-x-0"
+              className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                darkMode ? "bg-gray-600" : "bg-gray-300"
               }`}
-            ></div>
-          </button>
+              role="switch"
+              aria-checked={darkMode}
+            >
+              <div
+                className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
+                  darkMode ? "translate-x-6" : "translate-x-0"
+                }`}
+              />
+            </div>
+          </label>
         </div>
 
         {/* Units */}
@@ -63,14 +78,15 @@ const SettingsPage = () => {
         <div className="flex items-center justify-between p-4 transition-colors duration-300 shadow bg-gray-50 dark:bg-gray-800 rounded-xl">
           <div className="flex items-center gap-3">
             <Bell className="text-blue-500" />
-            <p className="font-medium">Weather Alerts</p>
+            <p className="font-medium">Notifications</p>
           </div>
           <input
-            type="checkbox"
-            checked={notifications}
-            onChange={() => setNotifications(!notifications)}
-            className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-          />
+  type="checkbox"
+  checked={notifications}
+  onChange={handleNotificationsToggle}
+  className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+/>
+
         </div>
 
         {/* Reset Data */}
@@ -80,7 +96,10 @@ const SettingsPage = () => {
             <p className="font-medium">Reset App Data</p>
           </div>
           <button
-            onClick={() => alert("Data cleared!")}
+            onClick={() => {
+              localStorage.clear();
+              alert("Data cleared! (localStorage cleared)");
+            }}
             className="px-4 py-2 text-white transition bg-red-500 rounded-xl hover:bg-red-600"
           >
             Reset

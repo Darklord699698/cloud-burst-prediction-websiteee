@@ -7,7 +7,21 @@ import UserData from "./models/Search.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// ✅ CORS setup
+const corsOptions = {
+  origin: [
+    "http://localhost:5173", // Vite dev server
+    "http://localhost:3000", // other dev frontend
+    "https://cloud-burst-prediction-web.onrender.com" // deployed frontend
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+app.use(cors(corsOptions));
+
+// ✅ Remove app.options("*", ...) to avoid PathError
+
 app.use(express.json());
 
 // Connect to MongoDB Atlas

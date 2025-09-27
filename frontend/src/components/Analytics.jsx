@@ -180,18 +180,21 @@ const Analytics = () => {
   const insights = buildInsights(current, forecast?.list || []);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen transition-colors duration-300 rounded-2xl ${document.documentElement.classList.contains("dark") ? "bg-gray-900 text-gray-100" : "bg-slate-50 text-gray-900"}`}>
+
+
+  
       {/* HERO */}
-      <div
-        className="relative h-56 overflow-hidden shadow-md rounded-b-2xl"
-        style={{
-          backgroundImage: current
-            ? `linear-gradient(rgba(6,6,23,0.45), rgba(6,6,23,0.45)), url(${bgImage})`
-            : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+<div
+  className="relative h-56 overflow-hidden shadow-md rounded-2xl"
+  style={{
+    backgroundImage: current
+      ? `linear-gradient(rgba(6,6,23,0.45), rgba(6,6,23,0.45)), url(${bgImage})`
+      : undefined,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
         <div className="absolute inset-0 flex items-center justify-between px-6">
           <div>
@@ -200,93 +203,101 @@ const Analytics = () => {
             </h1>
             <p className="mt-1 text-sm text-white/90">{lastUpdated ? `Last updated: ${lastUpdated}` : "Enter a place below and press Search"}</p>
           </div>
-
+  
           <div className="flex items-center gap-3">
             <input
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="Search city (e.g. Tokyo)"
-              className="w-64 px-4 py-2 text-black rounded-xl focus:outline-none"
+              className="w-64 px-4 py-2 rounded-xl focus:outline-none"
+              style={{
+                backgroundColor: document.documentElement.classList.contains("dark") ? "#1f2937" : "#fff",
+                color: document.documentElement.classList.contains("dark") ? "#f9fafb" : "#111",
+              }}
             />
             <button
               onClick={() => fetchData(city)}
-              className="flex items-center gap-2 px-4 py-2 text-black transition shadow bg-white/90 rounded-xl hover:scale-105"
+              className="flex items-center gap-2 px-4 py-2 transition shadow rounded-xl hover:scale-105"
+              style={{
+                backgroundColor: document.documentElement.classList.contains("dark") ? "#374151" : "#ffffff",
+                color: document.documentElement.classList.contains("dark") ? "#f9fafb" : "#111",
+              }}
             >
               <RefreshCw size={16} /> Search
             </button>
           </div>
         </div>
       </div>
-
+  
       {/* MAIN GRID */}
       <div className="max-w-6xl px-6 mx-auto mt-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+  
           {/* Left column: Cards + gauge */}
           <div className="space-y-6">
+  
             {/* Key stat cards */}
             <div className="grid grid-cols-2 gap-4">
-  {/* Temperature */}
-  <div className="flex flex-col p-4 bg-white shadow rounded-xl">
-    <div className="flex items-center gap-3">
-      <Thermometer className="text-red-500" size={28} />
-      <div className="flex flex-col">
-        <p className="text-sm text-gray-500">Temp</p>
-        <p className="text-lg font-semibold">{current ? `${Math.round(current.main.temp)}°C` : "—"}</p>
-      </div>
-    </div>
-    <p className="mt-2 text-sm text-gray-400">
-      Feels like {current ? `${Math.round(current.main.feels_like)}°C` : "—"}
-    </p>
-  </div>
-
-  {/* Humidity */}
-  <div className="flex flex-col p-4 bg-white shadow rounded-xl">
-    <div className="flex items-center gap-3">
-      <Droplets className="text-blue-500" size={28} />
-      <div className="flex flex-col">
-        <p className="text-sm text-gray-500">Humidity</p>
-        <p className="text-lg font-semibold">{current ? `${current.main.humidity}%` : "—"}</p>
-      </div>
-    </div>
-    <p className="mt-2 text-sm text-gray-400">
-      Pressure {current ? `${current.main.pressure} hPa` : "—"}
-    </p>
-  </div>
-
-  {/* Wind */}
-  <div className="flex flex-col p-4 bg-white shadow rounded-xl">
-    <div className="flex items-center gap-3">
-      <Wind className="text-yellow-500" size={28} />
-      <div className="flex flex-col">
-        <p className="text-sm text-gray-500">Wind</p>
-        <p className="text-lg font-semibold">{current ? `${Math.round(current.wind.speed)} m/s` : "—"}</p>
-      </div>
-    </div>
-    <p className="mt-2 text-sm text-gray-400">
-      Direction {current ? `${Math.round(current.wind.deg)}°` : "—"}
-    </p>
-  </div>
-
-  {/* Visibility */}
-  <div className="flex flex-col p-4 bg-white shadow rounded-xl">
-    <div className="flex items-center gap-3">
-      <Eye className="text-gray-600" size={28} />
-      <div className="flex flex-col">
-        <p className="text-sm text-gray-500">Visibility</p>
-        <p className="text-lg font-semibold">{current ? `${current.visibility / 1000} km` : "—"}</p>
-      </div>
-    </div>
-    <p className="mt-2 text-sm text-gray-400">
-      Time {current ? new Date(current.dt * 1000).toLocaleTimeString() : "—"}
-    </p>
-  </div>
-</div>
-
-
+              {/* Temperature */}
+              <div className={`flex flex-col p-4 shadow rounded-xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
+                <div className="flex items-center gap-3">
+                  <Thermometer className="text-red-500" size={28} />
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-500">Temp</p>
+                    <p className="text-lg font-semibold">{current ? `${Math.round(current.main.temp)}°C` : "—"}</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">
+                  Feels like {current ? `${Math.round(current.main.feels_like)}°C` : "—"}
+                </p>
+              </div>
+  
+              {/* Humidity */}
+              <div className={`flex flex-col p-4 shadow rounded-xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
+                <div className="flex items-center gap-3">
+                  <Droplets className="text-blue-500" size={28} />
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-500">Humidity</p>
+                    <p className="text-lg font-semibold">{current ? `${current.main.humidity}%` : "—"}</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">
+                  Pressure {current ? `${current.main.pressure} hPa` : "—"}
+                </p>
+              </div>
+  
+              {/* Wind */}
+              <div className={`flex flex-col p-4 shadow rounded-xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
+                <div className="flex items-center gap-3">
+                  <Wind className="text-yellow-500" size={28} />
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-500">Wind</p>
+                    <p className="text-lg font-semibold">{current ? `${Math.round(current.wind.speed)} m/s` : "—"}</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">
+                  Direction {current ? `${Math.round(current.wind.deg)}°` : "—"}
+                </p>
+              </div>
+  
+              {/* Visibility */}
+              <div className={`flex flex-col p-4 shadow rounded-xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
+                <div className="flex items-center gap-3">
+                  <Eye className="text-gray-600" size={28} />
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-500">Visibility</p>
+                    <p className="text-lg font-semibold">{current ? `${current.visibility / 1000} km` : "—"}</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">
+                  Time {current ? new Date(current.dt * 1000).toLocaleTimeString() : "—"}
+                </p>
+              </div>
+            </div>
+  
             {/* Cloudburst gauge card */}
-            <div className="flex items-center gap-6 p-6 bg-white shadow rounded-2xl">
+            <div className={`flex flex-col p-4 shadow rounded-xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
               <div className="flex items-center justify-center w-36 h-36">
-                {/* Progress ring (SVG) */}
                 <svg viewBox="0 0 36 36" className="w-28 h-28">
                   <path d="M18 2.0845a15.9155 15.9155 0 1 1 0 31.831 15.9155 15.9155 0 0 1 0-31.831" fill="none" stroke="#eee" strokeWidth="2" />
                   <motion.path
@@ -304,14 +315,14 @@ const Analytics = () => {
                   <text x="18" y="20.5" textAnchor="middle" className="text-sm" fill="#111" fontSize="6">{`${riskPercent}%`}</text>
                 </svg>
               </div>
-
+  
               <div className="flex-1">
                 <p className="text-sm text-gray-500">Cloudburst Risk (next 24h)</p>
                 <h3 className="text-2xl font-bold">
                   {riskPercent >= 70 ? "High" : riskPercent >= 40 ? "Medium" : "Low"}
                 </h3>
                 <p className="mt-2 text-sm text-gray-600">{current ? `Based on rainfall, humidity & pressure near ${current.name}` : "No data"}</p>
-
+  
                 {riskPercent >= 70 && (
                   <div className="flex items-center gap-2 p-2 mt-3 text-red-700 rounded bg-red-50">
                     <AlertTriangle /> Immediate attention recommended
@@ -320,65 +331,73 @@ const Analytics = () => {
               </div>
             </div>
           </div>
+  
+          {/* Middle column: chart + forecasts + insights */}
+<div className="space-y-6 lg:col-span-2">
+  {/* Chart */}
+  <div className={`p-4 shadow rounded-2xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
+    <h3 className="mb-3 text-lg font-semibold">Temperature & Precipitation (near-term)</h3>
+    <div className="h-56">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="time" />
+          <YAxis yAxisId="left" orientation="left" />
+          <Tooltip />
+          <Line yAxisId="left" type="monotone" dataKey="temp" stroke="#ef4444" name="Temp °C" strokeWidth={2} dot={{ r: 3 }} />
+          <Line yAxisId="right" type="monotone" dataKey="rain" stroke="#06b6d4" name="Rain mm (3h)" strokeWidth={2} dot={{ r: 3 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
 
-          {/* Middle column: chart + forecasts */}
-          <div className="space-y-6 lg:col-span-2">
-            <div className="p-4 bg-white shadow rounded-2xl">
-              <h3 className="mb-3 text-lg font-semibold">Temperature & Precipitation (near-term)</h3>
-              <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis yAxisId="left" orientation="left" />
-                    <Tooltip />
-                    <Line yAxisId="left" type="monotone" dataKey="temp" stroke="#ef4444" name="Temp °C" strokeWidth={2} dot={{ r: 3 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="rain" stroke="#06b6d4" name="Rain mm (3h)" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="p-4 bg-white shadow rounded-2xl">
-              <h3 className="mb-3 text-lg font-semibold">Near-term Forecast (next points)</h3>
-              <div className="grid gap-3">
-                {forecast?.list?.slice(0, 6).map((it, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded bg-gray-50">
-                    <div>
-                      <p className="text-sm font-medium">{new Date(it.dt_txt).toLocaleString()}</p>
-                      <p className="text-xs text-gray-500">{it.weather?.[0]?.description}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{Math.round(it.main.temp)}°C</p>
-                      <p className="text-sm text-gray-500">{it.rain ? `${it.rain["3h"] || 0} mm` : "0 mm"}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-4 bg-white shadow rounded-2xl">
-              <h3 className="mb-3 text-lg font-semibold">Insights</h3>
-              {insights.length ? (
-                <ul className="ml-5 space-y-2 text-sm text-gray-700 list-disc">
-                  {insights.map((ins, i) => (
-                    <li key={i}>{ins}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">No insights available — search a city to generate insights.</p>
-              )}
-            </div>
+  {/* Forecast */}
+  <div className={`p-4 shadow rounded-2xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
+    <h3 className="mb-3 text-lg font-semibold">Near-term Forecast (next points)</h3>
+    <div className="grid gap-3">
+      {forecast?.list?.slice(0, 6).map((it, idx) => (
+        <div key={idx} className={`flex items-center justify-between p-3 rounded ${document.documentElement.classList.contains("dark") ? "bg-gray-700 text-gray-100" : "bg-gray-50 text-gray-900"}`}>
+          <div>
+            <p className="text-sm font-medium">{new Date(it.dt_txt).toLocaleString()}</p>
+            <p className="text-xs text-gray-500">{it.weather?.[0]?.description}</p>
+          </div>
+          <div className="text-right">
+            <p className="font-semibold">{Math.round(it.main.temp)}°C</p>
+            <p className="text-sm text-gray-500">{it.rain ? `${it.rain["3h"] || 0} mm` : "0 mm"}</p>
           </div>
         </div>
+      ))}
+    </div>
+  </div>
 
-        {/* Footer small note */}
+  {/* Insights */}
+<div className={`p-4 shadow rounded-2xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
+  <h3 className="mb-3 text-lg font-semibold">Insights</h3>
+  {insights.length ? (
+    <ul className={`ml-5 space-y-2 text-sm list-disc ${document.documentElement.classList.contains("dark") ? "text-gray-100" : "text-gray-700"}`}>
+      {insights.map((ins, i) => (
+        <li key={i}>{ins}</li>
+      ))}
+    </ul>
+  ) : (
+    <p className={document.documentElement.classList.contains("dark") ? "text-gray-300" : "text-gray-500"}>
+      No insights available — search a city to generate insights.
+    </p>
+  )}
+</div>
+
+</div>
+
+        </div>
+  
+        {/* Footer */}
         <div className="mt-8 text-sm text-gray-500">
           <p>Data from OpenWeather. Images from Unsplash (via source.unsplash.com). This is a guide-based prediction — for official warnings rely on local authorities.</p>
         </div>
       </div>
     </div>
   );
+  
 };
 
 export default Analytics;

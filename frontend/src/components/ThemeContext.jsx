@@ -1,19 +1,34 @@
-import React, { createContext, useState, useEffect } from "react";
+// src/components/ThemeContext.jsx
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-export const ThemeContext = createContext();
+export const ThemeContext = createContext({
+  darkMode: false,
+  setDarkMode: () => {},
+});
+
+const getInitialTheme = () => {
+  try {
+    if (typeof window === "undefined") return false;
+    const stored = localStorage.getItem("darkMode");
+    if (stored !== null) return stored === "true";
+    // fallback to system preference
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  } catch (e) {
+    return false;
+  }
+};
 
 export const ThemeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(() => {
-    // load from localStorage if available
-    const saved = localStorage.getItem("darkMode");
-    return saved ? JSON.parse(saved) : false;
-  });
+  const [darkMode, setDarkMode] = useState(getInitialTheme);
 
   useEffect(() => {
-    if (darkMode) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-
-    localStorage.setItem("darkMode", JSON.stringify(darkMode));
+    const root = document.documentElement;
+    root.classList.toggle("dark", darkMode);
+    try {
+      localStorage.setItem("darkMode", darkMode);
+    } catch (e) {
+      // ignore if storage is disabled
+    }
   }, [darkMode]);
 
   return (
@@ -22,3 +37,6 @@ export const ThemeProvider = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
+
+// handy hook
+export const useTheme = () => useContext(ThemeContext);
