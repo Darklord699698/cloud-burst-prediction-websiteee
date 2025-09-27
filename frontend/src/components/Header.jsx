@@ -17,7 +17,7 @@ import { useEffect } from "react";
 import { getWeatherNotification } from "../components/weatherNotifications.jsx"; // we'll create this
 import { useRef } from "react"; // already importing useEffect
 
-const Header = ({ onSearch, isActivePage = true }) => { // default true if not passed
+const Header = ({ onSearch }) => { // default true if not passed
   const [searchInput, setSearchInput] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [saved, setSaved] = useState(false);
