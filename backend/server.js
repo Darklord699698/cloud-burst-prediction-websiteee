@@ -13,14 +13,13 @@ const corsOptions = {
   origin: [
     "http://localhost:5173", // Vite dev server
     "http://localhost:3000", // other dev frontend
-    "https://cloud-burst-prediction-web.onrender.com" // deployed frontend
+    "https://cloud-burst-prediction-websiteee.onrender.com" // deployed frontend
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 };
 app.use(cors(corsOptions));
-
-// ✅ Remove app.options("*", ...) to avoid PathError
 
 app.use(express.json());
 

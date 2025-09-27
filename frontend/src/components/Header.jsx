@@ -135,10 +135,10 @@ useEffect(() => {
   const { user } = useUser();
   const cities = ["Los Angeles", "Chicago", "New York"];
   // Determine backend URL based on environment
-  const BASE_URL = process.env.NODE_ENV === "development"
+const BASE_URL =
+import.meta.env.DEV
   ? "http://localhost:5000"
-  : "https://cloud-burst-prediction-web.onrender.com";
-
+  : "https://cloud-burst-prediction-websiteee-backend.onrender.com";
 
 const handleSearch = async (e) => {
 e.preventDefault();
@@ -153,6 +153,12 @@ if (user) {
       body: JSON.stringify({ city, userId: user.id }),
     });
 
+    if (!res.ok) {
+      // Handle non-200 responses
+      console.error("Failed to save search. Status:", res.status);
+      return;
+    }
+
     const data = await res.json();
     if (data.message === "Search saved successfully") {
       setSaved(true);
@@ -166,6 +172,7 @@ if (user) {
 onSearch(city);
 setShowDropdown(false);
 };
+
 
 
   const handleSelectCity = (city) => {
