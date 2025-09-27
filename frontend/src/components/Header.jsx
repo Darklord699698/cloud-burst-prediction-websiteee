@@ -25,6 +25,7 @@ const Header = ({ onSearch }) => {
   const [weatherNotifications, setWeatherNotifications] = useState([]);
 const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
+
 useEffect(() => {
   const weatherPhrases = [
     "is enjoying a bright day ☀️",

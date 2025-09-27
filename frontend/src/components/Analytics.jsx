@@ -1,4 +1,3 @@
-// src/components/Analytics.jsx
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -32,7 +31,22 @@ const Analytics = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [bgImage, setBgImage] = useState(null);
 
-  // Load persisted state from localStorage
+  // Dynamic temperature unit state
+  const [tempUnit, setTempUnit] = useState(() => {
+    const savedUnit = localStorage.getItem("temperatureUnit");
+    return savedUnit === "F" ? "F" : "C";
+  });
+
+  // Listen for temperature unit changes from Settings.jsx
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedUnit = localStorage.getItem("temperatureUnit");
+      setTempUnit(savedUnit === "F" ? "F" : "C");
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   useEffect(() => {
     const savedCity = localStorage.getItem("analytics_city");
     const savedCurrent = localStorage.getItem("analytics_current");
@@ -47,7 +61,6 @@ const Analytics = () => {
     if (savedBgImage) setBgImage(savedBgImage);
   }, []);
 
-  // Persist state to localStorage
   const persistState = (cityName, cur, fcast, bgImg) => {
     localStorage.setItem("analytics_city", cityName);
     localStorage.setItem("analytics_current", JSON.stringify(cur));
@@ -58,10 +71,6 @@ const Analytics = () => {
 
   const fetchData = async (cityName) => {
     if (!cityName) return;
-    if (!OPENWEATHER_KEY) {
-      setError("OpenWeather API key not found. Put it in VITE_OPENWEATHER_KEY");
-      return;
-    }
     setLoading(true);
     setError(null);
 
@@ -109,6 +118,10 @@ const Analytics = () => {
       setLoading(false);
     }
   };
+
+  // Convert Celsius to Fahrenheit if needed
+  const formatTemp = (tempC) =>
+    tempUnit === "F" ? Math.round(tempC * 9 / 5 + 32) : Math.round(tempC);
 
   const computeCloudburstRisk = (list = []) => {
     if (!list.length) return 0;
@@ -170,7 +183,7 @@ const Analytics = () => {
     if (!list) return [];
     return list.slice(0, points).map((it) => ({
       time: new Date(it.dt_txt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      temp: Number(it.main.temp.toFixed(1)),
+      temp: Number(formatTemp(it.main.temp)),
       rain: it.rain ? it.rain["3h"] || 0 : 0,
     }));
   };
@@ -181,7 +194,11 @@ const Analytics = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 rounded-2xl ${document.documentElement.classList.contains("dark") ? "bg-gray-900 text-gray-100" : "bg-slate-50 text-gray-900"}`}>
-
+      {/* HERO */}
+      {/* ... existing hero code ... */}
+      
+      {/* MAIN GRID */}
+      {/* In all places showing temperature, use formatTemp(current.main
 
   
       {/* HERO */}
@@ -244,11 +261,11 @@ const Analytics = () => {
                   <Thermometer className="text-red-500" size={28} />
                   <div className="flex flex-col">
                     <p className="text-sm text-gray-500">Temp</p>
-                    <p className="text-lg font-semibold">{current ? `${Math.round(current.main.temp)}°C` : "—"}</p>
+                    <p className="text-lg font-semibold">{current ? `${formatTemp(current.main.temp)}°${tempUnit}` : "—"}</p>
                   </div>
                 </div>
                 <p className="mt-2 text-sm text-gray-400">
-                  Feels like {current ? `${Math.round(current.main.feels_like)}°C` : "—"}
+                Feels like {current ? `${formatTemp(current.main.feels_like)}°${tempUnit}` : "—"}
                 </p>
               </div>
   
@@ -344,7 +361,8 @@ const Analytics = () => {
           <XAxis dataKey="time" />
           <YAxis yAxisId="left" orientation="left" />
           <Tooltip />
-          <Line yAxisId="left" type="monotone" dataKey="temp" stroke="#ef4444" name="Temp °C" strokeWidth={2} dot={{ r: 3 }} />
+          <Line yAxisId="left" type="monotone" dataKey="temp" stroke="#ef4444" name={`Temp °${tempUnit}`} strokeWidth={2} dot={{ r: 3 }} />
+
           <Line yAxisId="right" type="monotone" dataKey="rain" stroke="#06b6d4" name="Rain mm (3h)" strokeWidth={2} dot={{ r: 3 }} />
         </LineChart>
       </ResponsiveContainer>
@@ -355,18 +373,18 @@ const Analytics = () => {
   <div className={`p-4 shadow rounded-2xl ${document.documentElement.classList.contains("dark") ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}>
     <h3 className="mb-3 text-lg font-semibold">Near-term Forecast (next points)</h3>
     <div className="grid gap-3">
-      {forecast?.list?.slice(0, 6).map((it, idx) => (
-        <div key={idx} className={`flex items-center justify-between p-3 rounded ${document.documentElement.classList.contains("dark") ? "bg-gray-700 text-gray-100" : "bg-gray-50 text-gray-900"}`}>
-          <div>
-            <p className="text-sm font-medium">{new Date(it.dt_txt).toLocaleString()}</p>
-            <p className="text-xs text-gray-500">{it.weather?.[0]?.description}</p>
-          </div>
-          <div className="text-right">
-            <p className="font-semibold">{Math.round(it.main.temp)}°C</p>
-            <p className="text-sm text-gray-500">{it.rain ? `${it.rain["3h"] || 0} mm` : "0 mm"}</p>
-          </div>
-        </div>
-      ))}
+    {forecast?.list?.slice(0, 6).map((it, idx) => (
+  <div key={idx} className={`flex items-center justify-between p-3 rounded ${document.documentElement.classList.contains("dark") ? "bg-gray-700 text-gray-100" : "bg-gray-50 text-gray-900"}`}>
+    <div>
+      <p className="text-sm font-medium">{new Date(it.dt_txt).toLocaleString()}</p>
+      <p className="text-xs text-gray-500">{it.weather?.[0]?.description}</p>
+    </div>
+    <div className="text-right">
+      <p className="font-semibold">{formatTemp(it.main.temp)}°{tempUnit}</p>
+      <p className="text-sm text-gray-500">{it.rain ? `${it.rain["3h"] || 0} mm` : "0 mm"}</p>
+    </div>
+  </div>
+))}
     </div>
   </div>
 

@@ -23,6 +23,10 @@ const Forecast = () => {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [temperatureUnit, setTemperatureUnit] = useState(() => {
+    return localStorage.getItem("temperatureUnit") || "C";
+  });
+  
   const API_KEY = "7b3ffbfe64a1f83e9f112cb4896344ad";
 
   const fetchForecast = async () => {
@@ -163,69 +167,78 @@ const Forecast = () => {
           })()}
 
           {/* Forecast Cards */}
-          <div className="grid gap-4 mb-8 md:grid-cols-2">
-            {forecast.list.slice(0, 5).map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-4 bg-gray-100 shadow-md rounded-xl dark:bg-gray-800"
-              >
-                <p className="text-sm font-medium">
-                  {new Date(item.dt_txt).toLocaleString()}
-                </p>
-                <div className="flex gap-3 text-gray-700 dark:text-gray-200">
-                  <span className="flex items-center gap-1">
-                    <Thermometer size={18} /> {item.main.temp}°C
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Droplets size={18} /> {item.main.humidity}%
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <CloudRain size={18} /> {item.rain ? item.rain["3h"] || 0 : 0}mm
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+<div className="grid gap-4 mb-8 md:grid-cols-2">
+  {forecast.list.slice(0, 5).map((item, index) => (
+    <div
+      key={index}
+      className="flex items-center justify-between p-4 bg-gray-100 shadow-md rounded-xl dark:bg-gray-800"
+    >
+      <p className="text-sm font-medium">
+        {new Date(item.dt_txt).toLocaleString()}
+      </p>
+      <div className="flex gap-3 text-gray-700 dark:text-gray-200">
+        <span className="flex items-center gap-1">
+          <Thermometer size={18} />{" "}
+          {temperatureUnit === "C"
+            ? Math.round(item.main.temp)
+            : Math.round(item.main.temp * 9 / 5 + 32)}°{temperatureUnit}
+        </span>
+        <span className="flex items-center gap-1">
+          <Droplets size={18} /> {item.main.humidity}%
+        </span>
+        <span className="flex items-center gap-1">
+          <CloudRain size={18} /> {item.rain ? item.rain["3h"] || 0 : 0}mm
+        </span>
+      </div>
+    </div>
+  ))}
+</div>
 
-          {/* Line Chart for Temperature */}
-          <div>
-            <h3 className="mb-3 text-lg font-semibold">🌡️ Temperature Trend</h3>
-            <div className="h-64 p-3 bg-gray-50 rounded-2xl dark:bg-gray-800">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={forecast.list.slice(0, 8).map((item) => ({
-                    time: new Date(item.dt_txt).getHours() + ":00",
-                    temp: item.main.temp,
-                  }))}
-                  margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-                >
-                  <XAxis
-                    dataKey="time"
-                    stroke={axisColor}
-                    tick={{ fill: axisColor }}
-                    tickLine={{ stroke: axisColor, strokeWidth: 1 }}
-                  />
-                  <YAxis
-                    stroke={axisColor}
-                    tick={{ fill: axisColor }}
-                    tickLine={{ stroke: axisColor, strokeWidth: 1 }}
-                  />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: tooltipBg, borderRadius: 8 }}
-                    labelStyle={{ color: tooltipText }}
-                    itemStyle={{ color: tooltipText }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="temp"
-                    stroke={lineColor}
-                    strokeWidth={3}
-                    dot={{ r: 5, stroke: lineColor, fill: lineColor }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+{/* Line Chart for Temperature */}
+<div>
+  <h3 className="mb-3 text-lg font-semibold">🌡️ Temperature Trend</h3>
+  <div className="h-64 p-3 bg-gray-50 rounded-2xl dark:bg-gray-800">
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart
+        data={forecast.list.slice(0, 8).map((item) => ({
+          time: new Date(item.dt_txt).getHours() + ":00",
+          temp:
+            temperatureUnit === "C"
+              ? Math.round(item.main.temp)
+              : Math.round(item.main.temp * 9 / 5 + 32),
+        }))}
+        margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+      >
+        <XAxis
+          dataKey="time"
+          stroke={axisColor}
+          tick={{ fill: axisColor }}
+          tickLine={{ stroke: axisColor, strokeWidth: 1 }}
+        />
+        <YAxis
+          stroke={axisColor}
+          tick={{ fill: axisColor }}
+          tickLine={{ stroke: axisColor, strokeWidth: 1 }}
+          tickFormatter={(value) => value + `°${temperatureUnit}`} // dynamic unit
+        />
+        <Tooltip
+          contentStyle={{ backgroundColor: tooltipBg, borderRadius: 8 }}
+          labelStyle={{ color: tooltipText }}
+          itemStyle={{ color: tooltipText }}
+          formatter={(value) => value + `°${temperatureUnit}`} // tooltip shows °C/°F
+        />
+        <Line
+          type="monotone"
+          dataKey="temp"
+          stroke={lineColor}
+          strokeWidth={3}
+          dot={{ r: 5, stroke: lineColor, fill: lineColor }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
         </motion.div>
       )}
     </div>

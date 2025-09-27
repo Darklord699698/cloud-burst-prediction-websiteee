@@ -39,10 +39,20 @@ const Main = ({ searchedCity }) => {
   const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [temperatureUnit, setTemperatureUnit] = useState("C"); // default
+  const convertTemp = (temp) => {
+    return temperatureUnit === "C" ? Math.round(temp) : Math.round(temp * 9 / 5 + 32);
+  };
+  
 
   const apiKey = "7b3ffbfe64a1f83e9f112cb4896344ad";
   const unsplashAccessKey = "3YqgeNBUUUQ2wMEY4zQUcwN-zyjxwxiv7HyOWcPXV48"; // <-- Replace with your Unsplash access key
 const [dynamicImage, setDynamicImage] = useState(null);
+useEffect(() => {
+  const savedUnit = localStorage.getItem("temperatureUnit");
+  if (savedUnit === "F") setTemperatureUnit("F");
+  else setTemperatureUnit("C");
+}, []);
 
 
 useEffect(() => {
@@ -158,17 +168,18 @@ const displayImage = searchedCity
 
   const generateLineChartData = () => {
     if (!forecastData || !forecastData.list) return {};
-
+  
     const labels = forecastData.list
       .slice(0, 13)
       .map((item) => new Date(item.dt * 1000).getHours() + "h");
+  
     const data = forecastData.list.slice(0, 13).map((item) => item.main.temp);
-
+  
     return {
       labels,
       datasets: [
         {
-          label: "Temperature (°C)",
+          label: `Temperature (°${temperatureUnit})`, // ✅ Make this dynamic
           data,
           borderColor: "rgba(75, 192, 192, 1)",
           backgroundColor: "rgba(75, 192, 192, 0.2)",
@@ -179,6 +190,7 @@ const displayImage = searchedCity
       ],
     };
   };
+  
 
   const generate3DayForecast = () => {
     if (!forecastData || !forecastData.list) return [];
@@ -195,76 +207,89 @@ const displayImage = searchedCity
 
   const isDarkMode = document.documentElement.classList.contains("dark");
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { 
-          display: true, 
-          color: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.1)' 
-        },
-        ticks: { 
-          autoSkip: false,
-          color: isDarkMode ? '#E5E7EB' : '#1F2937' // dark gray for light mode
-        },
-      },
-      y: {
-        grid: { 
-          display: true, 
-          color: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.1)' 
-        },
-        ticks: { 
-          color: isDarkMode ? '#E5E7EB' : '#1F2937', 
-          callback: (value) => value + "%"
-        },
-      },
-    },
-    plugins: {
-      legend: { 
+  // Get user's preferred temperature unit
+
+
+// Helper to format rain or temperature values
+const formatValue = (value, type = "temp") => {
+  if (type === "temp") return `${temperatureUnit === "C" ? Math.round(value) : Math.round(value * 9 / 5 + 32)}°${temperatureUnit}`;
+  if (type === "rain") return `${value}%`;
+  return value;
+};
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      grid: { 
         display: true, 
-        position: "top",
-        labels: {
-          color: isDarkMode ? '#E5E7EB' : '#1F2937'
-        }
+        color: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.1)' 
       },
-      tooltip: {
-        titleColor: '#ffffff',
-        bodyColor: '#ffffff',
-        backgroundColor: isDarkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(243, 244, 246, 0.95)',
-        callbacks: {
-          label: (tooltipItem) =>
-            tooltipItem.label + ": " + tooltipItem.raw + "%",
-        },
+      ticks: { 
+        autoSkip: false,
+        color: isDarkMode ? '#E5E7EB' : '#1F2937'
       },
     },
-  };
-  
-  const lineChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
-        ticks: { color: isDarkMode ? '#E5E7EB' : '#1F2937' }
+    y: {
+      grid: { 
+        display: true, 
+        color: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.1)' 
       },
-      y: {
-        grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
-        ticks: { color: isDarkMode ? '#E5E7EB' : '#1F2937', callback: (value) => value + "°C" }
+      ticks: { 
+        color: isDarkMode ? '#E5E7EB' : '#1F2937', 
+        callback: (value) => formatValue(value, "rain") // Rain chances
       },
     },
-    plugins: {
-      legend: { labels: { color: isDarkMode ? '#E5E7EB' : '#1F2937' } },
-      tooltip: {
-        titleColor: isDarkMode ? '#ffffff' : '#111827',
-        bodyColor: isDarkMode ? '#ffffff' : '#111827',
-        backgroundColor: isDarkMode ? 'rgba(55,65,81,0.9)' : 'rgba(243,244,246,0.95)',
-        callbacks: {
-          label: (tooltipItem) => tooltipItem.label + ": " + tooltipItem.raw + "°C",
-        },
+  },
+  plugins: {
+    legend: { 
+      display: true, 
+      position: "top",
+      labels: {
+        color: isDarkMode ? '#E5E7EB' : '#1F2937'
+      }
+    },
+    tooltip: {
+      titleColor: '#ffffff',
+      bodyColor: '#ffffff',
+      backgroundColor: isDarkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(243, 244, 246, 0.95)',
+      callbacks: {
+        label: (tooltipItem) => `${tooltipItem.label}: ${formatValue(tooltipItem.raw, "rain")}`,
       },
     },
-  };
+  },
+};
+
+const lineChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
+      ticks: { color: isDarkMode ? '#E5E7EB' : '#1F2937' }
+    },
+    y: {
+      grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
+      ticks: { 
+        color: isDarkMode ? '#E5E7EB' : '#1F2937', 
+        callback: (value) => formatValue(value, "temp")
+      }
+    },
+  },
+  plugins: {
+    legend: { labels: { color: isDarkMode ? '#E5E7EB' : '#1F2937' } },
+    tooltip: {
+      titleColor: isDarkMode ? '#ffffff' : '#111827',
+      bodyColor: isDarkMode ? '#ffffff' : '#111827',
+      backgroundColor: isDarkMode ? 'rgba(55,65,81,0.9)' : 'rgba(243,244,246,0.95)',
+      callbacks: {
+        label: (tooltipItem) => `${tooltipItem.label}: ${formatValue(tooltipItem.raw, "temp")}`,
+      },
+    },
+  },
+};
+
   
 
   return (
@@ -307,7 +332,10 @@ const displayImage = searchedCity
                 <img src={assets.thermometer} className="w-6 h-6 mr-2" />
                 <div>
                   <h3 className="text-sm font-semibold">Temperature</h3>
-                  <p className="text-xs">{weatherData.main.temp}°C</p>
+                  <p className="text-xs">
+                  {convertTemp(weatherData.main.temp)}°{temperatureUnit}
+
+  </p>
                 </div>
               </div>
               <div className="flex items-center p-2 transition-colors duration-300 bg-blue-200 rounded-md dark:bg-blue-800">
@@ -359,8 +387,10 @@ const displayImage = searchedCity
           {day.date}
         </h3>
         <p className="text-xs text-gray-800 dark:text-gray-200">
-          Temp: {day.temp}°C
-        </p>
+  Temp: {convertTemp(weatherData.main.temp)}°{temperatureUnit}
+
+</p>
+
         <p className="text-xs text-gray-800 dark:text-gray-200">
           Weather: {day.weather}
         </p>

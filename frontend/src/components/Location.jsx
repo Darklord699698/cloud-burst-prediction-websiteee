@@ -22,6 +22,22 @@ const Location = () => {
     JSON.parse(localStorage.getItem("searchHistory")) || []
   );
 
+  // Dynamic temperature unit state
+  const [tempUnit, setTempUnit] = useState(() => {
+    const savedUnit = localStorage.getItem("temperatureUnit");
+    return savedUnit === "F" ? "F" : "C";
+  });
+
+  // Update tempUnit when localStorage changes (from Settings.jsx)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedUnit = localStorage.getItem("temperatureUnit");
+      setTempUnit(savedUnit === "F" ? "F" : "C");
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   useEffect(() => {
     fetchMultipleCities(cities);
   }, []);
@@ -117,6 +133,9 @@ const Location = () => {
     tooltipText: isDark ? "#ffffff" : "#000000",
   };
 
+  // helper to format temperature
+  const formatTemp = (tempC) => (tempUnit === "F" ? Math.round(tempC * 9/5 + 32) : Math.round(tempC));
+
   return (
     <div className={`p-6 ${bgColor} ${textColor} min-h-screen transition-colors duration-300 rounded-3xl`}>
 
@@ -157,7 +176,7 @@ const Location = () => {
               <h2 className="mb-2 text-xl font-semibold">{loc.name}, {loc.country}</h2>
               {loc.weather && (
                 <div className={`flex flex-wrap gap-2 mb-2 text-sm ${isDark ? "text-gray-100" : "text-gray-700"}`}>
-                  <span>🌡 {loc.weather.main.temp}°C</span>
+                  <span>🌡 {formatTemp(loc.weather.main.temp)}°{tempUnit}</span>
                   <span>💧 {loc.weather.main.humidity}% Humidity</span>
                   <span>💨 {loc.weather.wind.speed} m/s</span>
                 </div>
@@ -182,7 +201,7 @@ const Location = () => {
             <BarChart
               data={searchHistory.map(city => ({
                 name: city.name,
-                temp: city.weather?.main.temp,
+                temp: formatTemp(city.weather?.main.temp),
                 humidity: city.weather?.main.humidity,
                 wind: city.weather?.wind.speed,
               }))}
@@ -196,7 +215,7 @@ const Location = () => {
                 labelStyle={{ color: chartColors.tooltipText }}
               />
               <Legend wrapperStyle={{ color: chartColors.tooltipText }} />
-              <Bar dataKey="temp" fill={chartColors.temp} name="Temperature (°C)" />
+              <Bar dataKey="temp" fill={chartColors.temp} name={`Temperature (°${tempUnit})`} />
               <Bar dataKey="humidity" fill={chartColors.humidity} name="Humidity (%)" />
               <Bar dataKey="wind" fill={chartColors.wind} name="Wind Speed (m/s)" />
             </BarChart>
@@ -213,7 +232,7 @@ const Location = () => {
               <div key={idx} className={`relative p-2 border rounded ${isDark ? "border-gray-600" : "border-gray-300"}`}>
                 <h3 className="text-lg font-semibold">{loc.name}</h3>
                 {loc.weather && (
-                  <p>🌡 Temp: {loc.weather.main.temp}°C | 💧 Humidity: {loc.weather.main.humidity}% | 💨 Wind: {loc.weather.wind.speed} m/s</p>
+                  <p>🌡 Temp: {formatTemp(loc.weather.main.temp)}°{tempUnit} | 💧 Humidity: {loc.weather.main.humidity}% | 💨 Wind: {loc.weather.wind.speed} m/s</p>
                 )}
                 <button
                   onClick={() => toggleBookmark(loc.name)}

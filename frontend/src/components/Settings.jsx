@@ -1,26 +1,47 @@
 // src/pages/Settings.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sun, Moon, Thermometer, Bell, RefreshCw } from "lucide-react";
 import { useTheme } from "../components/ThemeContext";
 
 const SettingsPage = () => {
   const { darkMode, setDarkMode } = useTheme();
-  const [celsius, setCelsius] = useState(true);
-  // In Settings.jsx
-const [notifications, setNotifications] = useState(
-  localStorage.getItem("notificationsEnabled") === "false" ? false : true
-);
 
-const handleNotificationsToggle = () => {
-  setNotifications(!notifications);
-  localStorage.setItem("notificationsEnabled", !notifications);
-};
+  // Load temperature unit from localStorage or default to Celsius
+  const [celsius, setCelsius] = useState(() => {
+    const savedUnit = localStorage.getItem("temperatureUnit");
+    return savedUnit !== "F"; // default to Celsius
+  });
 
+  // Load notifications setting from localStorage
+  const [notifications, setNotifications] = useState(
+    localStorage.getItem("notificationsEnabled") === "false" ? false : true
+  );
 
+  // Update localStorage when notifications toggle changes
+  const handleNotificationsToggle = () => {
+    setNotifications(!notifications);
+    localStorage.setItem("notificationsEnabled", !notifications);
+  };
+
+  // Update localStorage when temperature unit changes
+  const handleUnitChange = (e) => {
+    const isCelsius = e.target.value === "C";
+    setCelsius(isCelsius);
+    localStorage.setItem("temperatureUnit", isCelsius ? "C" : "F");
+  };
+
+  // Ensure select reflects localStorage if changed elsewhere
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedUnit = localStorage.getItem("temperatureUnit");
+      setCelsius(savedUnit !== "F");
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return (
     <div className="min-h-screen p-6 overflow-hidden text-gray-900 transition-colors duration-300 bg-gray-100 dark:bg-gray-900 dark:text-gray-100 rounded-2xl">
-
       <div className="max-w-3xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">Settings</h1>
 
@@ -30,12 +51,7 @@ const handleNotificationsToggle = () => {
             {darkMode ? <Moon className="text-gray-200" /> : <Sun className="text-yellow-400" />}
             <p className="font-medium">Dark Mode</p>
           </div>
-
-          {/* Accessible toggle */}
-          <label
-            className={`inline-flex items-center cursor-pointer`}
-            aria-label="Toggle dark mode"
-          >
+          <label className="inline-flex items-center cursor-pointer" aria-label="Toggle dark mode">
             <input
               type="checkbox"
               className="sr-only"
@@ -58,7 +74,7 @@ const handleNotificationsToggle = () => {
           </label>
         </div>
 
-        {/* Units */}
+        {/* Temperature Unit */}
         <div className="flex items-center justify-between p-4 transition-colors duration-300 shadow bg-gray-50 dark:bg-gray-800 rounded-xl">
           <div className="flex items-center gap-3">
             <Thermometer className="text-red-500" />
@@ -66,7 +82,7 @@ const handleNotificationsToggle = () => {
           </div>
           <select
             value={celsius ? "C" : "F"}
-            onChange={(e) => setCelsius(e.target.value === "C")}
+            onChange={handleUnitChange}
             className="px-2 py-1 text-gray-900 border rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-100"
           >
             <option value="C">°C</option>
@@ -81,12 +97,11 @@ const handleNotificationsToggle = () => {
             <p className="font-medium">Notifications</p>
           </div>
           <input
-  type="checkbox"
-  checked={notifications}
-  onChange={handleNotificationsToggle}
-  className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-/>
-
+            type="checkbox"
+            checked={notifications}
+            onChange={handleNotificationsToggle}
+            className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         {/* Reset Data */}
