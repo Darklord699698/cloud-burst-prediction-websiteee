@@ -1,19 +1,20 @@
-import magnifyingglass from "./magnifyingglass.png"
-import notificationbell from "./notificationbell.png"
-import Analytics from "./Analytics.png"
-import home from "./home.png"
-import forecast from "./forecast.png"
-import location from "./location.png"
-import settings from "./settings.png"
-import calendar from "./calendar.png"
-import user from "./user.png"
-import sunset from "./sunset.png"
-import sunrise from "./sunrise.png"
-import thermometer from "./thermometer.png"
-import humidity from "./humidity.png"
-import wind from "./wind.png"
+import magnifyingglass from "./magnifyingglass.png";
+import notificationbell from "./notificationbell.png";
+import Analytics from "./Analytics.png";
+import home from "./home.png";
+import forecast from "./forecast.png";
+import location from "./location.png";
+import settings from "./settings.png";
+import calendar from "./calendar.png";
+import user from "./user.png";
+import sunset from "./sunset.png";
+import sunrise from "./sunrise.png";
+import thermometer from "./thermometer.png";
+import humidity from "./humidity.png";
+import wind from "./wind.png";
 import searchingAni from "./searching_ani.json";
-import EmailAni from "./Email.json";  // ✅ import your email Lottie
+import EmailAni from "./Email.json";
+import notificationSound from "./notification.mp3";  // ✅ add your audio file
 
 export const assets = {
   notificationbell,
@@ -31,5 +32,6 @@ export const assets = {
   humidity,
   wind,
   searchingAni,
-  EmailAni,  // ✅ add it here
+  EmailAni,
+  notificationSound,  // ✅ include here
 };

@@ -15,15 +15,29 @@ import emailjs from "emailjs-com";
 import EmailAni from "../assets/Email.json"; // ✅ import your Email.json
 import { useEffect } from "react";
 import { getWeatherNotification } from "../components/weatherNotifications.jsx"; // we'll create this
+import { useRef } from "react"; // already importing useEffect
 
-const Header = ({ onSearch }) => {
+const Header = ({ onSearch, isActivePage = true }) => { // default true if not passed
   const [searchInput, setSearchInput] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showSendingAnimation, setShowSendingAnimation] = useState(false);
   const [weatherNotifications, setWeatherNotifications] = useState([]);
-const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+
+  const audioRef = useRef(null);
+const prevNotifCount = useRef(weatherNotifications.length);
+
+
+  // Play notification sound only when new notification arrives AND on active page
+  useEffect(() => {
+    if (weatherNotifications.length > prevNotifCount.current && audioRef.current) {
+      audioRef.current.play().catch(err => console.log("Audio play error:", err));
+    }
+    prevNotifCount.current = weatherNotifications.length;
+  }, [weatherNotifications]);
+  
 
 
 useEffect(() => {
@@ -207,7 +221,7 @@ setShowDropdown(false);
   };
 
   return (
-    <header
+    <header 
       className={`relative z-10 flex items-center justify-between p-4 transition-colors duration-300 rounded-b-2xl ${
         document.documentElement.classList.contains("dark")
           ? "bg-gray-800 text-gray-100"
@@ -293,6 +307,8 @@ setShowDropdown(false);
     className="w-6 h-6 cursor-pointer"
     onClick={() => setShowNotifDropdown(!showNotifDropdown)}
   />
+   {/* Audio element for notification sound */}
+   <audio ref={audioRef} src={assets.notificationSound} />
   {/* Badge showing number of notifications */}
 {weatherNotifications.length > 0 && (
   <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-1 -right-1">
