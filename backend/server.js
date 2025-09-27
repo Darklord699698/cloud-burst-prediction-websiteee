@@ -5,21 +5,18 @@ import dotenv from "dotenv";
 import UserData from "./models/Search.js";
 
 dotenv.config();
-
 const app = express();
 
 // ✅ CORS setup
-const corsOptions = {
+app.use(cors({
   origin: [
-    "http://localhost:5173", // Vite dev server
-    "http://localhost:3000", // other dev frontend
+    "http://localhost:5173", // dev frontend
+    "http://localhost:3000", // dev frontend alternative
     "https://cloud-burst-prediction-websiteee.onrender.com" // deployed frontend
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-};
-app.use(cors(corsOptions));
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 app.use(express.json());
 
