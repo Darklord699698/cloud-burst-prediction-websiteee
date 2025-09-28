@@ -18,7 +18,11 @@ const App = () => {
       {activePage === 'home' && <Header onSearch={setSearchedCity} />}
 
       <div className="flex">
-        <Sidebar onNavigate={setActivePage} />
+      <Sidebar
+  onNavigate={setActivePage}
+  selectedCity={searchedCity || "Bengaluru, IN"} // default if null
+/>
+
         <div className="w-full p-6 ml-64">
           {activePage === 'home' && <Main searchedCity={searchedCity} />}
           {activePage === 'location' && <Location />}
