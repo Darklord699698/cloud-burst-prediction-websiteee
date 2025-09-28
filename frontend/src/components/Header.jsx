@@ -16,6 +16,7 @@ import EmailAni from "../assets/Email.json"; // ✅ import your Email.json
 import { useEffect } from "react";
 import { getWeatherNotification } from "../components/weatherNotifications.jsx"; // we'll create this
 import { useRef } from "react"; // already importing useEffect
+import { useLocation } from "react-router-dom";
 
 const Header = ({ onSearch }) => { // default true if not passed
   const [searchInput, setSearchInput] = useState("");
@@ -25,18 +26,30 @@ const Header = ({ onSearch }) => { // default true if not passed
   const [showSendingAnimation, setShowSendingAnimation] = useState(false);
   const [weatherNotifications, setWeatherNotifications] = useState([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const location = useLocation();
 
   const audioRef = useRef(null);
 const prevNotifCount = useRef(weatherNotifications.length);
 
 
   // Play notification sound only when new notification arrives AND on active page
+
   useEffect(() => {
-    if (weatherNotifications.length > prevNotifCount.current && audioRef.current) {
-      audioRef.current.play().catch(err => console.log("Audio play error:", err));
+    const lastCount = Number(localStorage.getItem("notifCount") || 0);
+  
+    // Only play if the new count is actually higher than the stored one
+    if (weatherNotifications.length > lastCount && audioRef.current) {
+      audioRef.current.play().catch(err =>
+        console.log("Audio play error:", err)
+      );
     }
-    prevNotifCount.current = weatherNotifications.length;
+  
+    // Save the new count so it persists even if Header unmounts
+    localStorage.setItem("notifCount", weatherNotifications.length.toString());
   }, [weatherNotifications]);
+  
+  
+  
   
 
 

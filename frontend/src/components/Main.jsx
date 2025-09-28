@@ -28,6 +28,7 @@ ChartJS.register(
 
 
 const images = [
+  {src: "https://t3.ftcdn.net/jpg/04/86/28/58/360_F_486285886_6gNLgFgckusuTuDPtSMwSrTu9hualPMU.jpg",name:"Bangalore",country:"IN"},
   { src: "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/475000/475457-Los-Angeles.jpg", name: "Los Angeles", country: "US" },
   { src: "https://media.cntraveller.com/photos/64f4fc5f663208f83a21af16/3:2/w_3000,h_2000,c_limit/New%20York%20City_GettyImages-1347979016.jpg", name: "New York", country: "US" },
   { src: "https://cdn.choosechicago.com/uploads/2019/06/general-contact-1800x900.jpg", name: "Chicago", country: "US" },
@@ -43,6 +44,7 @@ const Main = ({ searchedCity }) => {
   const convertTemp = (temp) => {
     return temperatureUnit === "C" ? Math.round(temp) : Math.round(temp * 9 / 5 + 32);
   };
+  
   
 
   const apiKey = "7b3ffbfe64a1f83e9f112cb4896344ad";
