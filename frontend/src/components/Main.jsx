@@ -404,29 +404,35 @@ const lineChartOptions = {
         </div>
 
         <div className="flex-1 mt-4 lg:mt-0 lg:ml-4">
-          <div className="mb-4">
-            <h2 className="text-xl font-bold">Chances of Raining</h2>
-            <div className="h-48 p-4 transition-colors duration-300 bg-pink-200 rounded-md dark:bg-pink-900">
-              {loading ? (
-                <p>Loading...</p>
-              ) : error ? (
-                <p>{error}</p>
-              ) : (
-                <Bar data={generateBarChartData()} options={chartOptions} />
-              )}
-            </div>
-          </div>
-          <div className="mb-4">
-            <h2 className="text-xl font-bold">Temperature Timeline</h2>
-            <div className="h-64 p-4 transition-colors duration-300 bg-teal-300 rounded-md dark:bg-teal-900">
-              {loading ? (
-                <p>Loading...</p>
-              ) : error ? (
-                <p>{error}</p>
-              ) : (
-                <Line data={generateLineChartData()} options={lineChartOptions} />
-              )}
-            </div>
+  <div className="flex flex-col gap-4 lg:flex-col">
+    {/* Chances of Raining */}
+    <div className="p-4 transition-colors duration-300 bg-pink-200 rounded-md h-80 dark:bg-pink-900">
+      <h2 className="mb-2 text-xl font-bold">Chances of Raining</h2>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <Bar data={generateBarChartData()}
+        options={{ ...chartOptions, maintainAspectRatio: false, layout: { padding: { bottom: 20 } } }}
+        className="w-full h-full" />
+      )}
+      
+    </div>
+
+    {/* Temperature Timeline */}
+    <div className="p-4 transition-colors duration-300 bg-teal-300 rounded-md h-80 dark:bg-teal-900">
+      <h2 className="mb-2 text-xl font-bold">Temperature Timeline</h2>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <Line data={generateLineChartData()}
+        options={{ ...lineChartOptions, maintainAspectRatio: false }}
+        className="w-full h-full" />
+      )}
+    </div>
           </div>
         </div>
       </div>
